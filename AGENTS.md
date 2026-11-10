@@ -12,6 +12,8 @@ under `docs/`.
   mutate external services unless the user explicitly requests it.
 - Other sessions can share this checkout. Check `git status` and file times before
   editing files you didn't write, and report work that isn't yours.
+- Changes go on a `work/<topic>-YYYYMMDD` branch in a separate worktree, then to `main`;
+  only a push to `prod` deploys. See `CONTRIBUTING.md`.
 
 ## Start here
 

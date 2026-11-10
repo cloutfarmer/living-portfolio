@@ -20,6 +20,20 @@ Parameters:
     Type: Number
     Default: 5
     Description: Alert above this monthly spend, in US dollars.
+  GitHubOwner:
+    Type: String
+    Default: cloutfarmer
+    Description: The GitHub account that owns the living-portfolio repository, whose deploy workflow may assume DeployRole.
+  CreateGitHubOidcProvider:
+    Type: String
+    AllowedValues: ['true', 'false']
+    Default: 'false'
+    Description: >-
+      The GitHub OIDC provider is one per AWS account. 'true' creates it in this stack; 'false' uses the one that
+      already exists. Check with: aws iam list-open-id-connect-providers.
+
+Conditions:
+  CreateOidcProvider: !Equals [!Ref CreateGitHubOidcProvider, 'true']
 
 Rules:
   CertificateRegion:
@@ -268,6 +282,59 @@ Resources:
             - SubscriptionType: EMAIL
               Address: !Ref AlertEmail
 
+  # GitHub Actions deploys through OIDC: no stored AWS keys (docs/DECISIONS.md). Thumbprints are no longer needed for
+  # GitHub's issuer, so none are listed.
+  GitHubOidcProvider:
+    Type: AWS::IAM::OIDCProvider
+    Condition: CreateOidcProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList:
+        - sts.amazonaws.com
+
+  # Only the deploy workflow running in this repository's production environment (which admits only prod) can assume
+  # it, and it can only do what web/scripts/deploy.mjs does: read the stack, write and delete site files, invalidate.
+  DeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Description: GitHub Actions content deploy for living-portfolio (docs/DEPLOY.md)
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              # The provider's ARN is fixed per account, so this works whether this stack created it or not.
+              Federated: !Sub 'arn:aws:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com'
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub: !Sub 'repo:${GitHubOwner}/living-portfolio:environment:production'
+      Policies:
+        - PolicyName: deploy-content
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: ListSiteFiles
+                Effect: Allow
+                Action: s3:ListBucket
+                Resource: !GetAtt SiteBucket.Arn
+              - Sid: WriteSiteFiles
+                Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource: !Sub '${SiteBucket.Arn}/*'
+              - Sid: InvalidateCache
+                Effect: Allow
+                Action: cloudfront:CreateInvalidation
+                Resource: !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}'
+              - Sid: ReadStackOutputs
+                Effect: Allow
+                Action: cloudformation:DescribeStacks
+                Resource: !Ref AWS::StackId
+
 Outputs:
   BucketName:
     Value: !Ref SiteBucket
@@ -278,3 +345,6 @@ Outputs:
     Value: !GetAtt Distribution.DomainName
   SiteUrl:
     Value: !Sub 'https://${DomainName}'
+  DeployRoleArn:
+    Description: Store as the production environment secret AWS_DEPLOY_ROLE_ARN; it contains the account ID.
+    Value: !GetAtt DeployRole.Arn

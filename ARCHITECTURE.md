@@ -63,7 +63,8 @@ private S3 bucket through CloudFront at `alexsigua.com`, defined in `infra/site.
 and uploaded by `web/scripts/deploy.mjs`. There's no server, and the personal site's routes are `#/` hashes, so no
 fallback routing is needed; a CloudFront Function only maps folder paths to `index.html` and `www` to the apex.
 Hashed assets are immutable, HTML always revalidates, the room's GLB goes up Brotli-encoded
-([decisions](docs/DECISIONS.md)), and a deploy refuses uncommitted changes. Procedure,
+([decisions](docs/DECISIONS.md)), and a deploy refuses uncommitted changes. A push to `prod` in either repository
+deploys through GitHub Actions (OIDC, no stored keys), while `infra/site.yml` stays a manual step. Procedure,
 costs, and rollback are in [deploy](docs/DEPLOY.md).
 
 ## Dashboard integration
