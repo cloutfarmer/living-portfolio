@@ -6,6 +6,8 @@ import { desk } from './desk'
 import { skyTime } from './weather'
 
 export const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+// How far a press may move, in pixels, and still count as a click rather than a drag to look around. Fingers wobble.
+export const TAP_SLOP = window.matchMedia('(pointer: coarse)').matches ? 10 : 4
 
 // On the back wall above the open space, clear of the shelf and the window.
 const CLOCK_POSITION: [number, number, number] = [-0.35, 2.3, -1.59]

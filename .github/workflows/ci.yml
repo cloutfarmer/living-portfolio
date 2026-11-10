@@ -15,17 +15,30 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      # Pinned by commit, so a moved tag can't change what runs. v4.4.0.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           fetch-depth: 0 # the public-safety check reads every commit's author and committer
           persist-credentials: false
-      # v4.4.0. First, so every step gets Node 22.18+: check-public.mjs needs zlib's zstd.
+      # v4.4.0. First, so every step gets Node 22.18+: check-public.mjs needs zlib's zstd, check-sky.mjs runs .ts imports.
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 22.18
+          cache: npm
+          cache-dependency-path: web/package-lock.json
       - name: Diff check
         run: git diff --check
       - name: Repository scan
         run: node .agent/repository-scan.mjs
       - name: Public-safety check
         run: node scripts/check-public.mjs
+      - name: Install
+        working-directory: web
+        run: npm ci
+      # Type-checks and bundles the room. The personal site lives in a private repository, so it isn't built here.
+      - name: Build
+        working-directory: web
+        run: npm run build
+      - name: Sky and weather checks
+        working-directory: web
+        run: npm test

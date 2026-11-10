@@ -17,7 +17,8 @@ import {
   Vector3,
 } from 'three'
 import { CameraRig, DIORAMA_FOV, SEATED_FOV, type Shot } from './CameraRig'
-import { Life, REDUCED_MOTION } from './Life'
+import { Life, REDUCED_MOTION, TAP_SLOP } from './Life'
+import { LoadBoundary } from './components/LoadBoundary'
 import { Nameplate, NAMEPLATES } from './components/Nameplate'
 import { REACTIVE, Reactions } from './Reactions'
 import { Stink } from './Stink'
@@ -39,7 +40,7 @@ const DESK_CAMERA = { polar: 0.62, scale: 2.35, distance: 10 }
 const DESK_PARTS = /^(Desk_|Main_Monitor|Right_Monitor|Shake_)/
 // Edit the bubbles' words here. They're the person's thoughts, so they speak as the person.
 const BUBBLES = [
-  { object: 'Main_Display', label: 'software', blurb: "Projects I've built. Click to see them.", goesTo: 'COMPUTER', nudge: '20%' },
+  { object: 'Main_Display', label: 'software', blurb: "Projects I've built, live on this screen.", goesTo: 'COMPUTER', nudge: '20%' },
   { object: 'Shake_lid', label: 'fitness', blurb: 'My training page and my soccer club, on Instagram.', goesTo: 'PHONE', nudge: '-58%' },
 ] as const
 // The share of the window the phone fills, nearly overhead, close enough that nothing above it gets in the way.
@@ -106,6 +107,14 @@ function seasonNow(): 'ski' | 'surf' {
 const NO_SHADOW = /^(Flame|Candle_|Shake_cup|Shake_lid|Back_wall|Back_baseboard|Window_recess|Window_dusk_pane)/
 
 type Pose = { position: Vector3; target: Vector3; zoom: number }
+
+// The pinboard couldn't load: the room opens without it rather than wait on the photos forever.
+function PhotosSkipped() {
+  useEffect(() => {
+    loadState.photos = true
+  }, [])
+  return null
+}
 
 // useGLTF has no progress option. The loader is shared, so this only reports on the room's own file.
 const reportRoomBytes: NonNullable<Parameters<typeof useGLTF>[3]> = (loader) => {
@@ -188,14 +197,12 @@ export function Room({
   const { actions } = useAnimations(animations, scene)
   const size = useThree((state) => state.size)
   const gl = useThree((state) => state.gl)
-  const camera = useThree((state) => state.camera)
   // Stays true after leaving until the screen has switched back, and the camera holds still until then.
   const [screenOpen, setScreenOpen] = useState(false)
   const closing = screenOpen && view !== 'COMPUTER'
   const handleScreenClosed = useCallback(() => setScreenOpen(false), [])
   const shotKey = closing ? 'COMPUTER' : board ? 'BOARD' : view
   const [landedKey, setLandedKey] = useState<string | null>(null)
-  const [arrivedKey, setArrivedKey] = useState<string | null>(null)
   // The view the pointer is resting on, which the camera leans toward.
   const [lean, setLean] = useState<View | null>(null)
   const [photoHovered, setPhotoHovered] = useState(false)
@@ -210,7 +217,9 @@ export function Room({
   const ambient = useRef<AmbientLight>(null)
   const cameFromRoom = useRef(false)
   const lastKey = useRef(shotKey)
-  useCursor(lean !== null || photoHovered)
+  const reacting = (view === 'ROOM' || view === 'DESK') && !board && !closing
+  // The one owner of the pointer cursor: two useCursor hooks reset each other, losing it over the desk.
+  useCursor(lean !== null || photoHovered || (reacting && reactionHovered))
 
   const lights = useMemo(() => {
     const found: { light: Light; base: number }[] = []
@@ -390,6 +399,8 @@ export function Room({
     lights.forEach(({ light: exported, base }) => {
       const light = exported as PointLight
       light.intensity = base
+      // A light switched off still costs every lit pixel, so leave it out of the shaders.
+      light.visible = base > 0
       // Blender's soft lights become hard lights here, and overlapping shadows look chaotic,
       // so only the candle casts them.
       if (/^Candle/.test(light.name)) {
@@ -405,10 +416,22 @@ export function Room({
         light.shadow.normalBias = 0.02
       }
     })
+    // A lost and restored WebGL context (common on phones when the tab is in the background) comes back with empty
+    // shadow maps, and nothing else asks for a redraw at night.
+    const redrawShadows = () => {
+      gl.shadowMap.needsUpdate = true
+    }
+    gl.domElement.addEventListener('webglcontextrestored', redrawShadows)
+    return () => gl.domElement.removeEventListener('webglcontextrestored', redrawShadows)
   }, [gl, scene, lights])
 
   useEffect(() => {
-    Object.values(actions).forEach((action) => action?.setLoop(LoopRepeat, Infinity).play())
+    // The flame's flicker. Reduced motion holds its first pose.
+    Object.values(actions).forEach((action) => {
+      if (!action) return
+      action.setLoop(LoopRepeat, Infinity).play()
+      action.paused = REDUCED_MOTION
+    })
   }, [actions])
 
   // The sports corner is part of the room, so both are in the scene once this runs.
@@ -421,20 +444,18 @@ export function Room({
 
   // A new destination clears the old arrival, and whatever was hovered is no longer where it was.
   useEffect(() => {
-    cameFromRoom.current = lastKey.current === 'ROOM:null'
+    cameFromRoom.current = lastKey.current === 'ROOM'
     lastKey.current = shotKey
     setLandedKey(null)
-    setArrivedKey(null)
     setLean(null)
   }, [shotKey])
 
   const handleLanding = useCallback((key: string) => {
     setLandedKey(key)
-    if (key === 'DESK:null' && cameFromRoom.current) setGlance((count) => count + 1)
+    if (key === 'DESK' && cameFromRoom.current) setGlance((count) => count + 1)
   }, [])
 
   const handleArrived = useCallback((key: string) => {
-    setArrivedKey(key)
     if (key === 'COMPUTER') setScreenOpen(true)
   }, [])
 
@@ -513,10 +534,12 @@ export function Room({
         onHover={(hovered) => setLean((current) => (hovered ? 'PHONE' : current === 'PHONE' ? null : current))}
         onSelect={onSelectPhone}
       />
-      {/* Its own boundary, so the room still appears while the photos load. */}
-      <Suspense fallback={null}>
-        <PhotoWall open={board} interactive={view === 'ROOM'} onOpen={onOpenBoard} onHover={setPhotoHovered} />
-      </Suspense>
+      {/* Its own boundaries: the room appears while the photos load, and stays if one of them fails. */}
+      <LoadBoundary fallback={<PhotosSkipped />}>
+        <Suspense fallback={null}>
+          <PhotoWall open={board} interactive={view === 'ROOM'} onOpen={onOpenBoard} onHover={setPhotoHovered} />
+        </Suspense>
+      </LoadBoundary>
       {/* Stands in for the bounce light that Cycles renders and this does not. */}
       <ambientLight ref={ambient} color="#aab0c4" intensity={AMBIENT} />
       {/* In the desk view it does nothing but mark the desk as on the object, so a click there doesn't step back. */}
@@ -527,7 +550,7 @@ export function Room({
           position={desk.getCenter(new Vector3())}
           onClick={(event) => {
             // A drag to look around also ends in a click; only a still press counts.
-            if (view !== 'ROOM' || event.delta > 4) return
+            if (view !== 'ROOM' || event.delta > TAP_SLOP) return
             // The candle sits inside this box, and its own click shouldn't also walk over to the desk.
             if (event.intersections.some(({ object }) => REACTIVE.test(object.name))) return
             onSelectDesk()
@@ -547,7 +570,7 @@ export function Room({
       <Stink scene={scene} visible={view === 'ROOM' || view === 'DESK'} />
       <Reactions
         scene={scene}
-        interactive={(view === 'ROOM' || view === 'DESK') && !board && !closing}
+        interactive={reacting}
         candle={candleLife}
         shut={blindsShut}
         onHover={setReactionHovered}

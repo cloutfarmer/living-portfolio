@@ -44,7 +44,8 @@ Choices that still apply, and why. "I" is the owner, Alex. Remove an entry when 
   shows from first paint in plain HTML. Each status reports a real load step; first visits hold each briefly (about
   2.8 s total), a click or key skips, return visits skip statuses, and weather waits 1.5 s at most.
 - **The landing's words are a museum placard** (`Placard.tsx`), so the room reads as an exhibit. My wording: software
-  engineer, open to full-time roles and freelance projects.
+  engineer, open to full-time roles and freelance projects. It carries GitHub, LinkedIn and Résumé links
+  (`ContactLinks.tsx`; links out, not routes), as do the no-JS page and the load-error screen. No email: this repo is public.
 - **Type is Alegreya,** self-hosted (88 KB), replacing Fraunces for storybook letterforms. Weight
   300 renders as 400. Device imitations (monitor, phone) keep system fonts.
 - **Every interface panel uses the desk bubbles' frame:** parchment in brass, cut corners, hard shadow, `.panel` in

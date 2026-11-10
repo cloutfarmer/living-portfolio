@@ -1,10 +1,10 @@
 import { Html } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Box3, CanvasTexture, Matrix4, Quaternion, Shape, SRGBColorSpace, TextureLoader, Vector3, type Group, type Mesh } from 'three'
 import previewUrl from '../assets/dashboard-preview.jpg'
 import { desk } from '../desk'
-import { REDUCED_MOTION } from '../Life'
+import { REDUCED_MOTION, TAP_SLOP } from '../Life'
 
 // Matches .screen-live's fade in styles.css.
 const SWITCH_BACK_MS = 260
@@ -64,6 +64,8 @@ export function Monitor({
     if (seated || active) return
     setLoaded(false)
   }, [seated, active])
+  // Crossing the phone width swaps one iframe for another, which starts loading from scratch.
+  useEffect(() => setLoaded(false), [mobile])
   // The person turns from the vim screen to this one as the visitor sits down.
   useEffect(() => {
     desk.focus = active ? 'main' : 'right'
@@ -84,6 +86,13 @@ export function Monitor({
   }, [])
   useEffect(() => () => preview.dispose(), [preview])
   const shown = loaded && !closing
+  // On phones the site covers the whole window, so the room behind it needn't keep drawing.
+  const setFrameloop = useThree((state) => state.setFrameloop)
+  useEffect(() => {
+    if (!mobile || !active || !shown) return
+    setFrameloop('never')
+    return () => setFrameloop('always')
+  }, [mobile, active, shown, setFrameloop])
   const { screen, note } = useMemo(() => {
     scene.updateMatrixWorld(true)
     return {
@@ -140,6 +149,7 @@ export function Monitor({
       decorations.forEach(({ mesh, visible }) => { mesh.visible = visible })
     }
   }, [scene])
+  const clipPath = useRef('')
   useFrame(({ camera }) => {
     if (!overlay.current) return
     // Project the physical note onto the glass from this camera. The CSS hole also
@@ -150,14 +160,18 @@ export function Monitor({
       const local = camera.position.clone().addScaledVector(direction, t).applyMatrix4(screenInverse)
       return `${(local.x / screen.width + 0.5) * width} ${(0.5 - local.y / screen.height) * height}`
     })
-    overlay.current.style.clipPath = `path(evenodd, '${glass}M${points.join('L')}Z')`
+    const next = `path(evenodd, '${glass}M${points.join('L')}Z')`
+    // Once seated the camera holds still, so most frames would write the same path again.
+    if (next === clipPath.current) return
+    clipPath.current = next
+    overlay.current.style.clipPath = next
   })
   return <>
     <mesh position={screen.position} quaternion={screen.quaternion} onClick={event => {
       // From the room, this click belongs to the desk behind it: one level at a time.
       if (!interactive) return
       event.stopPropagation()
-      if (event.delta < 4) onSelect()
+      if (event.delta <= TAP_SLOP) onSelect()
     }} onPointerOver={() => { if (interactive) onHover(true) }} onPointerMove={() => { if (interactive) onHover(true) }} onPointerOut={() => onHover(false)}>
       <shapeGeometry args={[shape]} onUpdate={geometry => {
         const positions = geometry.attributes.position, uv = geometry.attributes.uv

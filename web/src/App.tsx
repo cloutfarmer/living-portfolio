@@ -1,9 +1,10 @@
 import { Bloom, EffectComposer, ToneMapping, Vignette } from '@react-three/postprocessing'
 import { Canvas } from '@react-three/fiber'
 import { ToneMappingMode } from 'postprocessing'
-import { Component, type ReactNode, Suspense, useCallback, useEffect, useState } from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { DIORAMA_FOV } from './CameraRig'
 import { Intro } from './components/Intro'
+import { LoadBoundary } from './components/LoadBoundary'
 import { PhoneGuide } from './components/PhoneGuide'
 import { SiteLink } from './components/SiteLink'
 import { Placard } from './components/Placard'
@@ -16,19 +17,16 @@ const VIEWS: { name: View; label: string }[] = [
   { name: 'PHONE', label: 'Fitness' },
 ]
 
-class LoadBoundary extends Component<{ children: ReactNode }, { error?: Error }> {
-  state: { error?: Error } = {}
-  static getDerivedStateFromError(error: Error) {
-    return { error }
-  }
-  render() {
-    if (!this.state.error) return this.props.children
-    return (
-      <p className="message">
-        Could not load the scene ({this.state.error.message}). Run npm run export-scene, then reload.
-      </p>
-    )
-  }
+// Touch screens are usually phones and tablets: fewer multisampled samples keep the effects pass affordable.
+const COARSE = window.matchMedia('(pointer: coarse)').matches
+
+// What a screen reader hears when the view changes. The computer's line stands in for the monitor's sticky note.
+const ANNOUNCE: Record<View | 'BOARD', string> = {
+  ROOM: 'Room view.',
+  DESK: 'Desk view. Choose the computer for projects, or the phone.',
+  COMPUTER: 'The computer screen shows the live website. Scroll and click it, or choose Full screen.',
+  PHONE: 'Phone view: two Instagram notifications.',
+  BOARD: 'Pinboard view: the photos are spread out.',
 }
 
 export function App() {
@@ -42,7 +40,8 @@ export function App() {
   const [board, setBoard] = useState(false)
   const handleEnter = useCallback(() => setEntered(true), [])
   const handleIntroDone = useCallback(() => setIntroGone(true), [])
-  const show =useCallback((next: View) => {
+  const nav = useRef<HTMLElement>(null)
+  const show = useCallback((next: View) => {
     setView(next)
     setBoard(false)
     if (next === 'DESK' || next === 'PHONE') setSeenDesk(true)
@@ -57,43 +56,73 @@ export function App() {
     else if (view === 'DESK') show('ROOM')
   }, [board, view, show])
 
+  // Leaving unmounts the computer or phone controls as it's pressed, which would drop keyboard focus to the page. Hand it to the Desk button.
+  const leave = useCallback(() => {
+    show('DESK')
+    requestAnimationFrame(() => nav.current?.querySelector<HTMLButtonElement>('[aria-current]')?.focus({ preventScroll: true }))
+  }, [show])
+
   useEffect(() => {
-    const key=(event:KeyboardEvent)=>{if(event.key==='Escape')stepBack()};
-    const message=(event:MessageEvent)=>{if(event.origin!==location.origin||event.data?.type!=='portfolio:exit'||event.data?.version!==1)return;const frame=document.querySelector<HTMLIFrameElement>('iframe[title="Projects dashboard"]');if(event.source===frame?.contentWindow)show('DESK')};
-    window.addEventListener('keydown',key);window.addEventListener('message',message);
-    return()=>{window.removeEventListener('keydown',key);window.removeEventListener('message',message)};
-  },[stepBack,show]);
+    const key = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') stepBack()
+    }
+    // The embedded site asks to leave. Only the site this page framed, from this origin, may.
+    const message = (event: MessageEvent) => {
+      if (event.origin !== location.origin || event.data?.type !== 'portfolio:exit' || event.data?.version !== 1) return
+      const frame = document.querySelector<HTMLIFrameElement>('iframe[title="Projects dashboard"]')
+      if (event.source === frame?.contentWindow) leave()
+    }
+    window.addEventListener('keydown', key)
+    window.addEventListener('message', message)
+    return () => {
+      window.removeEventListener('keydown', key)
+      window.removeEventListener('message', message)
+    }
+  }, [stepBack, leave])
+
   return (
     <LoadBoundary>
-      <Canvas
-        // CameraRig places this every frame. The narrow lens keeps the room's diorama look.
-        camera={{ fov: DIORAMA_FOV, near: 1, far: 1000, position: [0, 0, 100] }}
-        shadows="percentage"
-        // A click off the object steps back. In the computer view the page takes the clicks that matter.
-        onPointerMissed={() => {
-          if (view !== 'COMPUTER') stepBack()
-        }}
-        // Lets a test read draw calls and sample motion. Stripped from production builds.
-        onCreated={({ gl, scene, camera }) => {
-          if (import.meta.env.DEV) Object.assign(window, { __renderer: gl, __scene: scene, __camera: camera })
-        }}
-      >
-        <color attach="background" args={['#0b0717']} />
-        <Suspense fallback={null}>
-          <Room view={view} board={board} onSelectDesk={handleSelectDesk} onOpenBoard={handleOpenBoard} onSelectComputer={() => show('COMPUTER')} onSelectPhone={() => show('PHONE')} />
-        </Suspense>
-        <EffectComposer>
-          {/* Only values above the threshold glow: candle flames and bright highlights. */}
-          <Bloom mipmapBlur intensity={0.35} luminanceThreshold={1} luminanceSmoothing={0.2} />
-          <ToneMapping mode={ToneMappingMode.AGX} />
-          <Vignette offset={0.35} darkness={0.55} />
-        </EffectComposer>
-      </Canvas>
+      <main className="stage">
+        {/* Not role="img" on the canvas: drei mounts the desk bubbles and the live site inside its wrapper. */}
+        <p className="sr-only">
+          A cozy 3D room: a developer at a corner desk with two monitors, a pinboard of photos, shelves, and a window
+          showing the live sky over the New Jersey coast. The menu below reaches every view.
+        </p>
+        <Canvas
+          // CameraRig places this every frame. The narrow lens keeps the room's diorama look.
+          camera={{ fov: DIORAMA_FOV, near: 1, far: 1000, position: [0, 0, 100] }}
+          // The effects pass draws the final image, so the canvas's own antialiasing would be wasted, and a dense
+          // phone screen needn't render every device pixel.
+          dpr={[1, 1.5]}
+          gl={{ antialias: false }}
+          shadows="percentage"
+          // A click off the object steps back. In the computer view the page takes the clicks that matter.
+          onPointerMissed={() => {
+            if (view !== 'COMPUTER') stepBack()
+          }}
+          // Lets a test read draw calls and sample motion. Stripped from production builds.
+          onCreated={({ gl, scene, camera }) => {
+            if (import.meta.env.DEV) Object.assign(window, { __renderer: gl, __scene: scene, __camera: camera })
+          }}
+        >
+          <color attach="background" args={['#0b0717']} />
+          <Suspense fallback={null}>
+            <Room view={view} board={board} onSelectDesk={handleSelectDesk} onOpenBoard={handleOpenBoard} onSelectComputer={() => show('COMPUTER')} onSelectPhone={() => show('PHONE')} />
+          </Suspense>
+          <EffectComposer multisampling={COARSE ? 2 : 4}>
+            {/* Only values above the threshold glow: candle flames and bright highlights. */}
+            <Bloom mipmapBlur intensity={0.35} luminanceThreshold={1} luminanceSmoothing={0.2} />
+            <ToneMapping mode={ToneMappingMode.AGX} />
+            <Vignette offset={0.35} darkness={0.55} />
+          </EffectComposer>
+        </Canvas>
+        <Placard visible={entered && view === 'ROOM' && !board} />
+      </main>
       {view === 'COMPUTER' && (
         <div className="leave leave-computer">
           <SiteLink expand />
           <span className="panel-cast">
-            <button className="panel leave-button" onClick={() => show('DESK')}>
+            <button className="panel leave-button" onClick={leave}>
               Leave computer
             </button>
           </span>
@@ -101,15 +130,14 @@ export function App() {
       )}
       {view === 'PHONE' && (
         <div className="leave leave-phone panel-cast">
-          <button className="panel leave-button" onClick={() => show('DESK')}>
+          <button className="panel leave-button" onClick={leave}>
             Put phone down
           </button>
         </div>
       )}
-      <Placard visible={entered && view === 'ROOM' && !board} />
       <PhoneGuide visible={view === 'PHONE'} />
       {/* Inert until the room shows, so keyboard focus can't land on controls behind the intro. */}
-      <nav className={`views${entered ? ' controls-in' : ''}`} aria-label="Camera view" inert={!entered}>
+      <nav ref={nav} className={`views${entered ? ' controls-in' : ''}`} aria-label="Camera view" inert={!entered}>
         {VIEWS.map(({ name, label }) => (
           <button key={name} aria-current={!board && view === name ? 'location' : undefined} onClick={() => show(name)}>
             {label}
@@ -129,15 +157,15 @@ export function App() {
       </nav>
       {entered && !seenDesk && !board && view !== 'COMPUTER' && (
         <p className="hint panel-cast">
-          <span className="panel hint-panel">Click the desk to take a closer look</span>
+          <span className="panel hint-panel">
+            <span className="for-pointer">Click</span>
+            <span className="for-touch">Tap</span> the desk to take a closer look
+          </span>
         </p>
       )}
-      {/* The monitor's sticky note says the screen is live; this says it to screen readers. */}
-      {view === 'COMPUTER' && (
-        <p className="sr-only" role="status">
-          The computer screen shows the live website. Scroll and click it, or choose Full screen.
-        </p>
-      )}
+      <p className="sr-only" role="status">
+        {entered ? ANNOUNCE[board ? 'BOARD' : view] : ''}
+      </p>
       {/* Required by the models' CC-BY licenses. See assets/ASSET_MANIFEST.csv. */}
       <details className={`credits${entered ? ' controls-in' : ''}`} inert={!entered}>
         <summary>Credits</summary>

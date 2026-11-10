@@ -15,7 +15,7 @@ files, and rejects files over 5 MiB. Neither proves behavior or license complian
 For site changes, also run from `web/`:
 
 - `npm run build`: typechecks and builds.
-- `node scripts/check-sky.mjs`: the sun against stored sunrise and sunset times, the moon's phase, the beam, daylight
+- `npm test` (`node scripts/check-sky.mjs`): the sun against stored sunrise and sunset times, the moon's phase, the beam, daylight
   and weather readings.
 - `node scripts/check-screen-animation.mjs`: 20 s of the real animation callback. The right monitor's old bars stay
   hidden under vim, typing reaches the shared desk state, and the head turns as `desk.focus` changes.

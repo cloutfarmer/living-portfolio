@@ -147,6 +147,20 @@ Resources:
           ReferrerPolicy:
             ReferrerPolicy: strict-origin-when-cross-origin
             Override: true
+          # Only this origin's own files run. connect-src: the live weather (room) and recent commits (the site).
+          # 'unsafe-inline' styles cover index.html's first-paint <style>. Walk every view with this policy before
+          # changing it; a missed source breaks the room silently.
+          ContentSecurityPolicy:
+            ContentSecurityPolicy: >-
+              default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:;
+              font-src 'self'; connect-src 'self' blob: https://api.weather.gov https://api.github.com;
+              frame-src 'self'; frame-ancestors 'self'; object-src 'none'; base-uri 'self'; form-action 'self'
+            Override: true
+        CustomHeadersConfig:
+          Items:
+            - Header: Permissions-Policy
+              Value: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+              Override: true
 
   Distribution:
     Type: AWS::CloudFront::Distribution
@@ -166,6 +180,17 @@ Resources:
         # North America and Europe only: the cheapest class.
         PriceClass: PriceClass_100
         DefaultRootObject: index.html
+        # A missing file shows a page with links home instead of S3's XML error. S3 answers 403 for a missing key
+        # when the reader can't list the bucket, so both map to a 404.
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 404
+            ResponsePagePath: /404.html
+            ErrorCachingMinTTL: 60
+          - ErrorCode: 404
+            ResponseCode: 404
+            ResponsePagePath: /404.html
+            ErrorCachingMinTTL: 60
         Origins:
           - Id: site-bucket
             DomainName: !GetAtt SiteBucket.RegionalDomainName

@@ -14,7 +14,7 @@ import {
   Vector3,
 } from 'three'
 import { channel, damp } from './CameraRig'
-import { REDUCED_MOTION } from './Life'
+import { REDUCED_MOTION, TAP_SLOP } from './Life'
 import { loadState } from './loading'
 
 // Every image in ./pinboard appears on the wall, in name order (photo-2 before photo-10). Fill it with
@@ -367,7 +367,7 @@ function Print({
     ? {
         onClick: (event: ThreeEvent<MouseEvent>) => {
           // A drag to look around also ends in a click; only a still press counts.
-          if (event.delta > 4) return
+          if (event.delta > TAP_SLOP) return
           event.stopPropagation()
           onActivate()
         },
@@ -482,7 +482,7 @@ export function PhotoWall({
   const corkHandlers = clickable
     ? {
         onClick: (event: ThreeEvent<MouseEvent>) => {
-          if (event.delta > 4) return
+          if (event.delta > TAP_SLOP) return
           event.stopPropagation()
           onOpen()
         },

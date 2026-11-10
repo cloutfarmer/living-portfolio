@@ -14,6 +14,9 @@ const dist = fileURLToPath(new URL('../dist/', import.meta.url))
 
 // Never published: it records the dashboard's revision and whether its checkout was dirty.
 const PRIVATE = new Set(['dashboard-build.json'])
+// Nor dotfiles (a Finder .DS_Store in assets/processed lands in the build) or source maps (the private site's build
+// would publish its source).
+const unpublishable = key => PRIVATE.has(key) || /(^|\/)\./.test(key) || key.endsWith('.map')
 // Hashed by Vite, so a changed file gets a new name and can be cached for a year.
 const IMMUTABLE = 'public, max-age=31536000, immutable'
 // Fixed names: revalidate HTML on every visit; the scene for a day (invalidated on each deploy).
@@ -62,7 +65,7 @@ const walk = dir => readdirSync(dir, { withFileTypes: true }).forEach(item => {
   else files.push(relative(dist, path).split(sep).join('/'))
 })
 walk(dist)
-const keys = files.filter(key => !PRIVATE.has(key))
+const keys = files.filter(key => !unpublishable(key))
 if (!keys.includes('index.html') || !keys.includes('projects/index.html')) {
   console.error('deploy: the build is missing index.html or projects/index.html; nothing uploaded.')
   process.exit(1)
@@ -79,7 +82,8 @@ for (const key of keys) {
 
 // Then remove what this build no longer has, including anything private uploaded by mistake.
 const noStack = bucket === '(no stack yet)'
-const remote = noStack ? [] : aws('s3api', 'list-objects-v2', '--bucket', bucket, '--query', 'Contents[].Key', '--output', 'text').split(/\s+/).filter(key => key && key !== 'None')
+// JSON, not text: text output splits on whitespace, so a key with a space in it would never be deleted.
+const remote = noStack ? [] : JSON.parse(aws('s3api', 'list-objects-v2', '--bucket', bucket, '--query', 'Contents[].Key', '--output', 'json')) ?? []
 const keep = new Set(keys)
 for (const key of remote.filter(key => !keep.has(key))) {
   if (dryRun) { console.log(`would delete ${key}`); continue }

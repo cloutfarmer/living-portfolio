@@ -16,7 +16,7 @@ entries.
   - Seasonal skis or surfboard.
   - Candle and blinds reactions.
   - A window with the real sun and moon and live National Weather Service weather.
-  - Credits, a title-fill loader, "Skip to portfolio" and "⤢ Full screen" pop-outs, and a museum placard.
+  - Credits, a title-fill loader, "Skip to portfolio" and "⤢ Full screen" pop-outs, and a museum placard with contact links.
 - **Deferred on purpose:** other routes and content panels. See [decisions](DECISIONS.md).
 
 ## Last verified
@@ -46,8 +46,13 @@ stated.
   and "← All projects" keeps the live page on the screen (production build).
 - **Room-only preview:** with no personal site checked out, `npx vite` loads the room, and Room → Projects → Leave
   computer returns to the Desk view with no page errors.
-- **Builds:** `npm run build` and `check-screen-animation.mjs` pass. CI runs the diff check, the repository scan, the
-  public-safety check and `kit-check`. It doesn't render the scene or the site.
+- **Failure paths** (production preview): a failed GLB or no WebGL shows the name, role, portfolio and contact links;
+  a failed photo hides only the pinboard. With JavaScript off, the contact links also show.
+- **Accessibility:** one live region announces each view, and leaving the computer or phone returns focus to "Desk".
+- **CSP:** the policy in `infra/site.yml`, injected on every response, reported 0 violations across all views and
+  `/projects/` (production preview). Live headers wait on a stack update.
+- **Builds:** `npm run build`, `npm test` and `check-screen-animation.mjs` pass. CI runs `npm ci`, the build,
+  `npm test`, the diff check, the repository scan, the public-safety check and `kit-check`. It doesn't render the scene.
 
 ## Could not verify
 

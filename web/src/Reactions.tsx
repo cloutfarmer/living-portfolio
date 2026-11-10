@@ -1,8 +1,7 @@
-import { useCursor } from '@react-three/drei'
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber'
-import { type MutableRefObject, useMemo, useRef, useState } from 'react'
+import { type MutableRefObject, useMemo, useRef } from 'react'
 import { Box3, IcosahedronGeometry, MathUtils, type Mesh, MeshBasicMaterial, type Object3D, Vector3 } from 'three'
-import { REDUCED_MOTION } from './Life'
+import { REDUCED_MOTION, TAP_SLOP } from './Life'
 
 // Small things to do in the room that lead nowhere: blow out the candle, tilt the blinds. They get the pointer cursor but
 // no nameplate: only things that change the view get one.
@@ -49,8 +48,6 @@ export function Reactions({ scene, interactive, candle, shut, onHover }: { scene
   }, [])
   const smoke = useRef<(Mesh | null)[]>([])
   const state = useRef({ outAt: -1, shutTarget: 0, clock: 0 })
-  const [hovered, setHovered] = useState<'candle' | 'blinds' | null>(null)
-  useCursor(interactive && hovered !== null)
 
   useFrame((_, delta) => {
     const s = state.current
@@ -102,18 +99,14 @@ export function Reactions({ scene, interactive, candle, shut, onHover }: { scene
     }
   })
 
-  const hover = (part: 'candle' | 'blinds') => ({
+  // Room owns the cursor, from onHover.
+  const hover = {
     onPointerOver: (event: ThreeEvent<PointerEvent>) => {
       event.stopPropagation()
-      if (!interactive) return
-      setHovered(part)
-      onHover(true)
+      if (interactive) onHover(true)
     },
-    onPointerOut: () => {
-      setHovered((current) => (current === part ? null : current))
-      onHover(false)
-    },
-  })
+    onPointerOut: () => onHover(false),
+  }
 
   return (
     <>
@@ -122,11 +115,11 @@ export function Reactions({ scene, interactive, candle, shut, onHover }: { scene
         visible={false}
         position={parts.candleBox.getCenter(new Vector3())}
         onClick={(event) => {
-          if (!interactive || event.delta > 4) return
+          if (!interactive || event.delta > TAP_SLOP) return
           event.stopPropagation()
           if (state.current.outAt < 0) state.current.outAt = state.current.clock
         }}
-        {...hover('candle')}
+        {...hover}
       >
         <boxGeometry args={parts.candleBox.getSize(new Vector3()).toArray()} />
       </mesh>
@@ -136,11 +129,11 @@ export function Reactions({ scene, interactive, candle, shut, onHover }: { scene
           visible={false}
           position={parts.blindsBox.getCenter(new Vector3())}
           onClick={(event) => {
-            if (!interactive || event.delta > 4) return
+            if (!interactive || event.delta > TAP_SLOP) return
             event.stopPropagation()
             state.current.shutTarget = state.current.shutTarget > 0.5 ? 0 : 1
           }}
-          {...hover('blinds')}
+          {...hover}
         >
           <boxGeometry args={parts.blindsBox.getSize(new Vector3()).toArray()} />
         </mesh>

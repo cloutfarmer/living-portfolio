@@ -2,10 +2,14 @@
   "name": "living-portfolio-web",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
+    "test": "node scripts/check-sky.mjs",
     "export-scene": "node scripts/export-scene.mjs",
     "predev": "node scripts/prepare-dashboard.mjs",
     "prepare-dashboard": "node scripts/prepare-dashboard.mjs",

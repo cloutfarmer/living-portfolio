@@ -34,7 +34,6 @@ type Step =
   | { pause: number }
   | { mode: 'INSERT' | 'NORMAL' }
   | { command: string }
-  | { clear: true }
 
 // One pass of the loop: write the array, fix a typo, save, add a function, save, read it over, clear.
 const STEPS: Step[] = [

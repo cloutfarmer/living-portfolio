@@ -5,7 +5,7 @@ commands in [asset generation](ASSET_GENERATION.md), which need no bridge. [Stat
 
 ## Tools
 
-Tested with Node 22 and Blender 5.2.3 LTS at `/Applications/Blender.app` (set `BLENDER` if it lives elsewhere); exact
+Tested with Node 22.18 and Blender 5.2.3 LTS at `/Applications/Blender.app` (set `BLENDER` if it lives elsewhere); exact
 package versions are in `web/package-lock.json`. The personal site on the monitor is a separate, private repository
 expected at `../portfolio-dashboard`, which the room builds into `/projects/` (see
 [architecture](../ARCHITECTURE.md#dashboard-integration)). Deploying needs the AWS CLI with an SSO profile; see
