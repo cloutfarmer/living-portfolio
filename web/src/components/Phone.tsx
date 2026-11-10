@@ -2,7 +2,7 @@ import { Html } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Box3, type Group, type Mesh, type Object3D, Quaternion, Vector3 } from 'three'
-import { REDUCED_MOTION } from '../Life'
+import { REDUCED_MOTION, TAP_SLOP } from '../Life'
 import { skyTime } from '../weather'
 
 type Notice = { account: string; url: string; name: string; about: string; action: string }
@@ -229,7 +229,7 @@ export function Phone({
           quaternion={glass.quaternion}
           onClick={(event) => {
             event.stopPropagation()
-            if (event.delta < 4) onSelect()
+            if (event.delta <= TAP_SLOP) onSelect()
           }}
           onPointerOver={() => onHover(true)}
           onPointerMove={() => onHover(true)}

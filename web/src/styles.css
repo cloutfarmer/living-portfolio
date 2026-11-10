@@ -114,7 +114,8 @@ button.panel:focus-visible::before {
 
 html,
 body,
-#root {
+#root,
+.stage {
   height: 100%;
   margin: 0;
   background: #0b0717;
@@ -298,7 +299,7 @@ body,
   }
 }
 
-/* The room's wall label, a brass-framed plaque. It only holds words, so the pointer goes straight through to the scene. */
+/* The room's wall label, a brass-framed plaque. The pointer goes through its words to the scene; only its links take it. */
 .placard {
   position: fixed;
   bottom: 1.5rem;
@@ -343,6 +344,50 @@ body,
   margin: 0.7rem 0 0;
 }
 
+/* Where a recruiter goes next: a row of plain links. */
+.contact-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.contact-links a {
+  color: inherit;
+  text-underline-offset: 0.18em;
+}
+
+.contact-links a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* The placard lets the pointer through to the scene; its links take it back. */
+.placard-contact {
+  margin-top: 0.55rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid #8c643166;
+  font-weight: 700;
+  pointer-events: auto;
+}
+
+.placard-contact a {
+  display: inline-block;
+  padding: 0.15rem 0;
+  color: var(--panel-label-ink);
+}
+
+/* Without JavaScript, under the skip link. */
+.intro-contact {
+  position: absolute;
+  right: 6%;
+  bottom: calc(7% - 2.2rem);
+  font-family: var(--serif);
+  text-shadow: var(--over-scene);
+}
+
 /* Phones: the shortest label, clear of Credits and the hint.
    The menu wraps to a second row rather than run off the screen. */
 @media (max-width: 767px) {
@@ -376,7 +421,32 @@ body,
   white-space: nowrap;
   pointer-events: none;
   /* Late, so anyone already exploring never sees it. */
-  animation: hint-in 0.8s ease 5s backwards;
+  animation: hint-in 0.8s ease 2.5s backwards;
+}
+
+/* Medium windows: the centred hint would sit on the placard, so it moves above Credits. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hint {
+    right: 1rem;
+    bottom: 4.5rem;
+    left: auto;
+    transform: none;
+  }
+}
+
+/* Words for a mouse or for a finger. */
+.for-touch {
+  display: none;
+}
+
+@media (hover: none) {
+  .for-pointer {
+    display: none;
+  }
+
+  .for-touch {
+    display: inline;
+  }
 }
 
 @media (max-width: 767px) {
@@ -740,6 +810,7 @@ body,
   }
 
   .intro-title,
+  .intro-site,
   .intro-status,
   .intro-swell,
   .intro-returning .intro-words {
@@ -817,8 +888,27 @@ body,
   inset: 0;
   display: grid;
   place-content: center;
+  justify-items: center;
+  gap: 1rem;
   padding: 2rem;
+  font-family: var(--serif);
   text-align: center;
+}
+
+.message p {
+  margin: 0;
+  max-width: 30rem;
+}
+
+.message-name {
+  font-size: 1.25rem;
+  font-style: italic;
+}
+
+.message-dev {
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+  opacity: 0.7;
 }
 
 /* PARKED with AltTab.tsx for a future easter egg: the window switcher. Sizes are in the screen's own 1440-wide pixels. */
@@ -961,9 +1051,13 @@ body,
   background: var(--brass-lit);
 }
 
+/* As for button.panel: the clip-path cuts off an outline, so focus thickens the bright frame instead of matching hover. */
 .site-link-button:focus-visible {
-  outline: 2px solid #f3e6d3;
-  outline-offset: 3px;
+  outline: none;
+}
+
+.site-link-button:focus-visible::before {
+  inset: 4px;
 }
 
 .site-link-icon {
@@ -1003,7 +1097,47 @@ body,
 /* Narrow windows have no room beside the view buttons. */
 @media(max-width:767px){.leave-phone{top:auto;right:auto;bottom:20px;left:20px}}
 /* On phones the site fills the window, and its own header is at the top, so the two buttons sit at the bottom. */
-@media(max-width:767px){.leave-computer{top:auto;right:16px;bottom:16px;left:16px;justify-content:space-between}}
+/* The strip between them lets taps through to the site underneath. */
+@media (max-width: 767px) {
+  .leave-computer {
+    top: auto;
+    right: 16px;
+    bottom: 16px;
+    left: 16px;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+
+  .leave-computer > * {
+    pointer-events: auto;
+  }
+}
+
+/* Touch screens: controls at least 44 px tall, the size a fingertip covers. */
+@media (pointer: coarse) {
+  .views button,
+  .credits summary {
+    min-height: 44px;
+  }
+
+  .views-site .site-link-button {
+    padding-top: 0.7rem;
+    padding-bottom: 0.8rem;
+  }
+
+  .credits summary {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+}
+
+/* Phones with the taller Credits target: the placard sits clear above it. */
+@media (pointer: coarse) and (max-width: 767px) {
+  .placard {
+    bottom: 4.5rem;
+  }
+}
 @media(max-width:767px){.intro-site{left:6%;right:auto}}
 .sr-only{position:fixed;top:0;left:0;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 @media(max-width:767px){iframe[title="Projects dashboard"]{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important}}

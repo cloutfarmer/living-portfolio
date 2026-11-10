@@ -8,13 +8,15 @@ and `www` redirect to `https://alexsigua.com/`. No content is uploaded yet, so t
 
 - **Infrastructure:** `infra/site.yml`, one CloudFormation stack in **us-east-1**. It holds a private S3
   bucket that only CloudFront can read (Origin Access Control), an ACM certificate, Route 53 aliases for
-  the apex and `www` (which redirects to the apex), security headers, and a monthly cost alert.
+  the apex and `www` (which redirects to the apex), security headers (an enforced CSP and a Permissions-Policy),
+  a branded `404.html` for missing paths, and a monthly cost alert. Template changes need the stack deployed again
+  (step 3 below) before they're live.
 - **Content:** `web/scripts/deploy.mjs` builds the personal site from the sibling `portfolio-dashboard`
   checkout and the room from this one, uploads `web/dist`, deletes what the build no longer has, and
   invalidates the HTML and the other fixed-name files.
 - **Caching:** files under `assets/` are hashed by Vite, so they're cached for a year. HTML is revalidated
   on every visit. Fixed names (the scene GLB, `og.jpg`) get a day, and every deploy invalidates them.
-- `dashboard-build.json` is never uploaded. It records the site's revision for local checks only.
+- `dashboard-build.json`, dotfiles and source maps are never uploaded.
 
 ## Cost
 
@@ -50,7 +52,7 @@ The stack's budget emails at 80% of $5 a month and when the month is forecast pa
 
 - `curl -sI https://alexsigua.com/` and `https://alexsigua.com/projects/` return 200 with HSTS.
   `http://` and `https://www.` return 301 to `https://alexsigua.com/`.
-- `curl -sI https://alexsigua.com/dashboard-build.json` returns 404.
+- `curl -sI https://alexsigua.com/dashboard-build.json` returns 404, and `/` carries `content-security-policy`.
 - In a browser: the room loads, the computer shows the site, and "Skip to portfolio" and
   "Back to the room" work. There are no console errors.
 

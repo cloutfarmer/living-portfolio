@@ -5,7 +5,7 @@ agents I work with. Agents also follow [AGENTS.md](AGENTS.md).
 
 ## Setup
 
-Node.js 22. Blender 5.2.3 LTS only if you change the scene. Details are in [setup](docs/SETUP.md).
+Node.js 22.18 or later. Blender 5.2.3 LTS only if you change the scene. Details are in [setup](docs/SETUP.md).
 
 ```bash
 cd web

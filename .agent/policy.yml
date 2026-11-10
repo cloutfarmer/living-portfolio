@@ -3,7 +3,7 @@ modules: [core, review, triage]
 base_branch: main
 ci_job: ci
 scan_command: node .agent/repository-scan.mjs
-human_only_paths: [.env*, .github/workflows/**, .agent/policy.yml]
+human_only_paths: [.env*, .github/workflows/**, .agent/policy.yml, .agent/repository-scan.mjs, scripts/check-public.mjs, .claude/**, AGENTS.md, infra/**, web/scripts/deploy.mjs]
 design_triggers: [new dependency, schema change, breaking public API change, auth change]
 never_run: []
 allowed_extra_docs: [docs/images, docs/ASSET_GENERATION.md, docs/BLENDER_VIEWING.md, docs/DECISIONS.md, docs/DEPLOY.md, docs/PROJECT_SPEC.md, docs/SETUP.md]

@@ -183,7 +183,7 @@ export function Intro({ onEnter, onDone }: { onEnter: () => void; onDone: () => 
         <div className="intro-centre">
           {/* The placard holds the page's real heading. Matches index.html's plain copy. */}
           <div ref={title} className="intro-title" aria-hidden="true" style={rise(0)}>
-            <span className="intro-name">Alex Sigua</span>
+            <span className="intro-name">Alex Sigua · Software Engineer</span>
             <span className="intro-work" style={TITLE_STYLE}>
               {WORDS.map((letters, word) => (
                 <Fragment key={word}>

@@ -490,7 +490,9 @@ export function Outdoors({ scene, sky, roomLight }: { scene: Object3D; sky: SkyS
 
     if (!REDUCED_MOTION) {
       seaTime.current += delta
-      fall.current += delta * (weather.snow > weather.rain ? 1 : 6)
+      // Only while something falls: a clock left counting under clear skies loses shader precision within a day.
+      if (weather.rain > 0 || weather.snow > 0) fall.current += delta * (weather.snow > weather.rain ? 1 : 6)
+      else fall.current = 0
       sway.current += delta * (0.7 + wind * 3.2)
       // Wind blows from its compass direction: from the south, it moves things north, toward +z.
       const toward = MathUtils.degToRad(weather.windDirection + 180)

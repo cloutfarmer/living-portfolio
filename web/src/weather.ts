@@ -104,7 +104,7 @@ export function readWeather(response: unknown, now = Date.now()): Weather | null
 // A reading in plain words, for the loading status.
 export function describeWeather({ storm, snow, rain, fog, cloud }: Weather) {
   if (storm > 0) return 'a thunderstorm'
-  if (snow > 0) return snow >= 0.7 ? 'heavy snow' : 'light snow'
+  if (snow > 0) return snow >= 1 ? 'heavy snow' : snow >= 0.7 ? 'snow' : 'light snow'
   if (rain > 0) return rain >= 0.7 ? 'heavy rain' : rain > 0.45 ? 'rain' : 'light rain'
   if (fog >= 0.5) return 'fog'
   if (cloud >= 0.85) return 'overcast'
@@ -113,8 +113,12 @@ export function describeWeather({ storm, snow, rain, fog, cloud }: Weather) {
 
 function readCache(): Weather | null {
   try {
-    const cached = JSON.parse(localStorage.getItem(CACHE_KEY) ?? 'null') as { at: number; weather: Weather } | null
-    return cached && Date.now() - cached.at < REFRESH_MS ? cached.weather : null
+    const cached = JSON.parse(localStorage.getItem(CACHE_KEY) ?? 'null') as { at?: unknown; weather?: Partial<Weather> } | null
+    if (!cached || typeof cached.at !== 'number' || !cached.weather) return null
+    // A time in the future would keep the entry fresh forever, and a missing field would reach the shaders as NaN.
+    const age = Date.now() - cached.at
+    const complete = (Object.keys(CLEAR) as (keyof Weather)[]).every((key) => Number.isFinite(cached.weather?.[key]))
+    return age >= 0 && age < REFRESH_MS && complete ? (cached.weather as Weather) : null
   } catch {
     return null
   }

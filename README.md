@@ -1,12 +1,17 @@
 # The Living Portfolio
 
+**Live at [alexsigua.com](https://alexsigua.com)** · Alex Sigua, software engineer, open to full-time roles ·
+[GitHub](https://github.com/cloutfarmer) · [LinkedIn](https://www.linkedin.com/in/alexsigua) ·
+[Résumé](https://alexsigua.com/projects/alex-sigua-resume.pdf)
+
 A cozy 3D room you can look around in a browser. A developer sits at a cluttered corner desk, the window shows the real
 sun, moon and weather over the New Jersey coast right now, and clicking the desk's main monitor opens my actual
 portfolio site, live, on the screen. It's the front door of [alexsigua.com](https://alexsigua.com).
 
 The whole scene is written as Python, built headlessly in Blender, exported to a single GLB file, and rendered with
-React Three Fiber. Most of it was built with AI coding agents driving Blender, under the measured checks and lessons
-recorded in this repo.
+React Three Fiber. I designed the system and made the calls: the module boundaries, the single-owner camera rig, the
+versioned `postMessage` contract with the site, and the measured checks every scene change must pass. AI coding agents
+did much of the typing, including driving Blender, under those checks and the guardrails in [`.agent/`](.agent).
 
 <p align="center">
   <img src="docs/images/room.jpg" alt="The room at noon: a person at a desk with two monitors, a pinboard of photos, shelves, a surfboard and a sunny beach outside the window" width="900">
@@ -22,7 +27,7 @@ recorded in this repo.
 - **Poke things:** blow out the candle, tilt the blinds, and open the pinboard to spread out the photos. The corner
   holds skis in winter and a surfboard the rest of the year.
 - **Use any input:** every view is reachable from a plain text menu by keyboard. With JavaScript off, the page still
-  shows the name and a working link to the portfolio.
+  shows the name, role, a link to the portfolio and contact links.
 
 ## Engineering highlights
 
@@ -66,11 +71,11 @@ Each change ends with a review sheet that shows the scene from several angles, l
 | 3D in the browser | Three.js via React Three Fiber, Drei and postprocessing |
 | Data | National Weather Service API, called from the browser |
 | Hosting | AWS S3 + CloudFront, Route 53 and ACM, via CloudFormation |
-| CI | GitHub Actions: diff check, secret scan, public-safety check, agent-kit check |
+| CI | GitHub Actions: build, sky tests, diff check, secret scan, public-safety check, agent-kit check |
 
 ## Run it locally
 
-Requires Node.js 22. The exported scene is committed, so Blender isn't needed to view it.
+Requires Node.js 22.18 or later. The exported scene is committed, so Blender isn't needed to view it.
 
 ```bash
 cd web
