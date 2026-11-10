@@ -7,9 +7,11 @@ Choices that still apply, and why. "I" is the owner, Alex. Remove an entry when 
 
 - **Routing is mostly deferred.** I chose not to route anything until the core is done; reactions that stay in
   the room are allowed. Lifted for the two desk bubbles (`software` → the site on the main monitor, `fitness` → the
-  phone) and the website pop-out: "Skip to portfolio →" on the loader (plain HTML, so it shows before the 3D loads) and
-  in the view menu, and "⤢ Full screen" beside "Leave computer". All go, in the same tab, to
-  `/projects/index.html?from=room`, which shows "Back to the room". I wanted all three clearly visible.
+  phone) and the website pop-out, "⤢ Full screen" beside "Leave computer", which goes in the same tab to
+  `/projects/index.html?from=room` and shows "Back to the room". The loader's "Skip to portfolio →" opens the Computer
+  view instead, so visitors see the site in the room and can pop out from there; Cmd-click, the plain-HTML copy before
+  the script runs, and the load-error screen still go to the full site. The view menu's copy was dropped for the
+  placard's "See my projects".
 - **The screen's interactivity is spelled out** on the monitor's sticky note only; a matching bottom hint was dropped
   as a duplicate, so screen readers get a hidden status line instead.
 - **The person codes on the right monitor and the site lives on the main one,** as I laid it out: vim in a loop on
@@ -55,14 +57,19 @@ Choices that still apply, and why. "I" is the owner, Alex. Remove an entry when 
   shows from first paint in plain HTML. Each status reports a real load step; first visits hold each briefly (about
   2.8 s total), a click or key skips, return visits skip statuses, and weather waits 1.5 s at most.
 - **The landing's words are a museum placard** (`Placard.tsx`), so the room reads as an exhibit. My wording: software
-  engineer, open to full-time roles and freelance projects. It carries GitHub, LinkedIn and Résumé links
+  engineer, open to full-time roles and freelance projects, with the projects on the computer. It sits top-left under
+  the view menu, where the eye lands first, because visitors (recruiters especially) could miss that the work is on the
+  computer. Its filled-brass "See my projects →" button goes straight to the Computer view. It carries GitHub, LinkedIn and Résumé links
   (`ContactLinks.tsx`; links out, not routes), as do the no-JS page and the load-error screen. No email: this repo is public.
 - **Type is Alegreya,** self-hosted (88 KB), replacing Fraunces for storybook letterforms. Weight
   300 renders as 400. Device imitations (monitor, phone) keep system fonts.
 - **Every interface panel uses the desk bubbles' frame:** parchment in brass, cut corners, hard shadow, `.panel` in
   `styles.css`. The view menu stays plain text with a gold diamond, so the room stays uncovered.
 - **Nameplates only on things whose click changes the view** (the desk and closed pinboard). Stay-put reactions, the
-  candle and blinds, get the pointer cursor only.
+  candle and blinds, get the pointer cursor only. One exception shows without hover: "Projects · live on this screen"
+  over the main monitor glows slowly in the Room view until the visitor first reaches the desk, computer or phone, so
+  the goal is visible in the scene itself. It replaced the bottom "Click the desk" hint, which the placard and this
+  nameplate made redundant.
 - **The candle blows out and the blinds tilt on a click** (`Reactions.tsx`). The candle relights after about 4.5 s;
   the blinds are one morph target, so no extra draw calls.
 - **The left-wall corner changes with the season:** skis and poles December to March, a fish surfboard otherwise, by the

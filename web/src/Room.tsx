@@ -181,6 +181,7 @@ function addWoodGrain(material: MeshStandardMaterial) {
 export function Room({
   view,
   board,
+  guide,
   onSelectDesk,
   onOpenBoard,
   onSelectComputer,
@@ -189,6 +190,8 @@ export function Room({
   view: View
   /** Whether the pinboard is open: the closest view of the photos. */
   board: boolean
+  /** Whether the room should point at the computer: the visitor hasn't reached the desk, computer or phone yet. */
+  guide: boolean
   onSelectDesk: () => void
   onOpenBoard: () => void
   onSelectComputer: () => void
@@ -264,17 +267,26 @@ export function Room({
     return [x, desk.max.y, z] as const
   }, [desk])
 
+  // The middle of an object's top, where a panel's leader points.
+  const topOf = useCallback(
+    (name: string) => {
+      const item = scene.getObjectByName(name)
+      if (!item) return null
+      const box = new Box3().setFromObject(item)
+      const { x, z } = box.getCenter(new Vector3())
+      return [x, box.max.y, z] as const
+    },
+    [scene],
+  )
   const bubbles = useMemo(
     () =>
       BUBBLES.flatMap(({ object, ...words }) => {
-        const item = scene.getObjectByName(object)
-        if (!item) return []
-        const box = new Box3().setFromObject(item)
-        const { x, z } = box.getCenter(new Vector3())
-        return [{ ...words, position: [x, box.max.y, z] as const }]
+        const position = topOf(object)
+        return position ? [{ ...words, position }] : []
       }),
-    [scene],
+    [topOf],
   )
+  const monitorTop = useMemo(() => topOf('Main_Display'), [topOf])
 
   const shots = useMemo(() => {
     const fit = (scale: number) => Math.min(size.width, size.height) / scale
@@ -578,6 +590,10 @@ export function Room({
         onHover={setReactionHovered}
       />
       {view === 'ROOM' && !board && lean === 'DESK' && !reactionHovered && <Nameplate position={deskTop} {...NAMEPLATES.DESK} />}
+      {/* Points at the computer until the visitor first gets there; the desk's own plate takes over while it's hovered. */}
+      {view === 'ROOM' && !board && guide && monitorTop && lean !== 'DESK' && !photoHovered && (
+        <Nameplate position={monitorTop} beckon {...NAMEPLATES.COMPUTER} />
+      )}
       {view === 'ROOM' && !board && photoHovered && <Nameplate position={BOARD_FACE} {...NAMEPLATES.BOARD} />}
       {view === 'DESK' &&
         !closing &&
