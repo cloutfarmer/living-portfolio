@@ -60,7 +60,9 @@ stated.
   of the menu, Credits or the monitor nameplate. "See my projects" opens the Computer view with the live site;
   "Leave computer" focuses "Desk", and back in the room the nameplate is gone. Reduced motion stops the nameplate's
   glow. The loader's "Skip to portfolio" lands on the Computer view with the live site, 0 page errors. At 1024x768
-  the placard covers most of the pinboard.
+  the placard covers most of the pinboard. On phones the placard is compact, its button and links on one row, and the room drops
+  into the spare height below it. Playwright WebKit at 375x548, 390x664 and 430x739 shows the monitor nameplate clear of
+  the placard; at 320x568 the placard fits the width.
 - **Accessibility:** one live region announces each view, and leaving the computer or phone returns focus to "Desk".
 - **CSP:** the production build, served with the exact header from `infra/site.yml`, logs 0 page errors, 0 console
   errors and 0 CSP violations through Room, Desk, Projects, Fitness, Pinboard, "Skip to portfolio" and "Back to the
