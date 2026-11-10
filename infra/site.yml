@@ -24,6 +24,14 @@ Parameters:
     Type: String
     Default: cloutfarmer
     Description: The GitHub account that owns the living-portfolio repository, whose deploy workflow may assume DeployRole.
+  GitHubOwnerId:
+    Type: String
+    Default: '92342407'
+    Description: That account's numeric ID (public; gh api users/<owner> --jq .id).
+  GitHubRepoId:
+    Type: String
+    Default: '1452090528'
+    Description: The living-portfolio repository's numeric ID (public; gh api repos/<owner>/living-portfolio --jq .id).
   CreateGitHubOidcProvider:
     Type: String
     AllowedValues: ['true', 'false']
@@ -307,10 +315,12 @@ Resources:
               # The provider's ARN is fixed per account, so this works whether this stack created it or not.
               Federated: !Sub 'arn:aws:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com'
             Action: sts:AssumeRoleWithWebIdentity
+            # GitHub's immutable subject names the owner and repository with their IDs, so a renamed, deleted or
+            # re-created repository of the same name can't inherit this trust.
             Condition:
               StringEquals:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
-                token.actions.githubusercontent.com:sub: !Sub 'repo:${GitHubOwner}/living-portfolio:environment:production'
+                token.actions.githubusercontent.com:sub: !Sub 'repo:${GitHubOwner}@${GitHubOwnerId}/living-portfolio@${GitHubRepoId}:environment:production'
       Policies:
         - PolicyName: deploy-content
           PolicyDocument:
