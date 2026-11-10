@@ -65,7 +65,7 @@ Choices that still apply, and why. "I" is the owner, Alex. Remove an entry when 
   back. Built in the browser with per-print shadows, because the room's shadows are drawn once. With more photos than
   prints, one changes every 45–75 s with a 2.4 s fade, none while open. The shimmer is rationed: 120 ms rest, 8 s per
   print, one at a time. Photos are redrawn as 96-pixel art with 10 shades per channel (`PIXEL_ART`) to match the room;
-  dithering was dropped.
+  dithering was dropped. They ship at 256 px (`LONG_EDGE` in `prepare-photos.mjs`), 2.6× what that art needs.
 - **In `Room.tsx`:** wood grain is a shader (baked lighting not chosen), and the desk view is a steeper bird's-eye from
   `DESK_CAMERA`, not Blender's `DESK` camera. Coffee glare comes from leaned normals, as there's no environment map.
 - **The two shelves match** in oak and brackets. **Removed props** stay out unless I ask for them back.
@@ -77,7 +77,12 @@ Choices that still apply, and why. "I" is the owner, Alex. Remove an entry when 
   never raise a cap unless the measurement itself changes.
 - **Static parts merge at export,** in memory, so Blender keeps them editable. **`lib/layout.py` shifts whole prop
   files** at build time instead of rewriting hundreds of literals.
-- **The room's GLB stays uncompressed:** no `gltf-transform` or Draco.
+- **The room's GLB stays plain glTF:** no `gltf-transform`, Draco or meshopt, so every vertex ships as exported and no
+  decoder is needed. The deploy Brotli-encodes it instead (2.28 MB → 0.53 MB), because CloudFront doesn't compress
+  `model/gltf-binary`. Meshopt would be smaller still, but it rewrites the geometry; reopen it only if measured load
+  times call for it.
+- **The GLB carries no UVs** unless a material samples an image (`export_web_glb.py`). The site draws its screens on
+  its own geometry and its grain from world position, so UVs were unused and about 20% of the file.
 
 ## Props
 

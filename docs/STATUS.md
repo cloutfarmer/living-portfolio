@@ -25,7 +25,12 @@ Headless Blender 5.2.3 LTS and Playwright's Chromium, at 1440x900 unless noted. 
 stated.
 
 - **Scene:** `check_scene.py` reports 0 failures (19 capped warnings). `check_glb.py` reports the contract as OK, at
-  2.86 MB, 49,594 triangles, 178 primitives and 0 images. The Room view was checked at 1440x900, 1920x1080 and 390x844.
+  2.28 MB (0.53 MB Brotli), 49,594 triangles, 178 primitives and 0 images. The Room view was checked at 1440x900,
+  1920x1080 and 390x844.
+- **Smaller first load** (production build, served locally with the deploy's headers): dropping UVs left every
+  triangle's positions, normals and shape-key deltas identical. Room and pinboard screenshots at 1440x900 and 390x844
+  match the previous build. Through Brotli, the loader counts the GLB's decoded bytes against its real size. At a
+  throttled 2 Mbps, the GLB took 4.8 s instead of 17.7 s. Not yet checked through live CloudFront.
 - **Room reactions:** `?season=ski` and the surfboard show. The candle blows out, smokes and relights. The blinds
   close and dim the window, and stink lines rise over the gym bag.
 - **Panels:** brass-framed parchment panels and nameplates show at 1440x900 and 390x800 with no page errors. Reduced

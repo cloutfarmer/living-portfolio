@@ -3,8 +3,10 @@
 // --dry-run builds and lists what would change without uploading, deleting or invalidating.
 // Procedure and rollback: docs/DEPLOY.md.
 import { execFileSync } from 'node:child_process'
-import { readdirSync, readFileSync } from 'node:fs'
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join, relative, sep } from 'node:path'
+import { brotliCompressSync, constants } from 'node:zlib'
 import { fileURLToPath } from 'node:url'
 
 const dryRun = process.argv.includes('--dry-run')
@@ -74,10 +76,27 @@ if (!keys.includes('index.html') || !keys.includes('projects/index.html')) {
 // Assets first and HTML last, so no page ever points at a file that isn't up yet.
 const order = key => key.endsWith('.html') ? 2 : cacheFor(key) === IMMUTABLE ? 0 : 1
 keys.sort((a, b) => order(a) - order(b) || a.localeCompare(b))
-for (const key of keys) {
-  if (dryRun) { console.log(`would upload ${key} (${cacheFor(key)})`); continue }
-  aws('s3', 'cp', join(dist, key), `s3://${bucket}/${key}`, '--cache-control', cacheFor(key), '--only-show-errors')
-  console.log(`uploaded ${key}`)
+// CloudFront compresses only the types on its list, and model/gltf-binary isn't one, so the scene goes up already
+// Brotli-encoded (docs/DECISIONS.md). Every browser with WebGL2 accepts Brotli over HTTPS.
+const encoded = mkdtempSync(join(tmpdir(), 'living-portfolio-deploy-'))
+const upload = key => {
+  if (!key.endsWith('.glb')) return { file: join(dist, key), flags: [], note: '' }
+  const raw = readFileSync(join(dist, key))
+  const brotli = brotliCompressSync(raw, { params: { [constants.BROTLI_PARAM_QUALITY]: 11, [constants.BROTLI_PARAM_SIZE_HINT]: raw.length } })
+  const file = join(encoded, key.split('/').join('_'))
+  writeFileSync(file, brotli)
+  const mb = bytes => (bytes / 1e6).toFixed(2)
+  return { file, flags: ['--content-encoding', 'br', '--content-type', 'model/gltf-binary'], note: `, Brotli ${mb(raw.length)} -> ${mb(brotli.length)} MB` }
+}
+try {
+  for (const key of keys) {
+    const { file, flags, note } = upload(key)
+    if (dryRun) { console.log(`would upload ${key} (${cacheFor(key)}${note})`); continue }
+    aws('s3', 'cp', file, `s3://${bucket}/${key}`, '--cache-control', cacheFor(key), ...flags, '--only-show-errors')
+    console.log(`uploaded ${key}${note}`)
+  }
+} finally {
+  rmSync(encoded, { recursive: true, force: true })
 }
 
 // Then remove what this build no longer has, including anything private uploaded by mistake.

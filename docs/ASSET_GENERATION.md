@@ -112,7 +112,9 @@ side is dim: brighten dark colors, or give small text a little emission, as `Lab
 
 **Names the site depends on** are listed in `lib/site_contract.py`; both checks fail if one goes missing. Add new
 lookups there, and never add those objects to `MERGE` in `tools/export_web_glb.py`. **Budgets:** none until
-real-hardware profiling; current size is in [status](STATUS.md). Report a prop that adds noticeably to it.
+real-hardware profiling; current size is in [status](STATUS.md). Report a prop that adds noticeably to it. The export
+drops UVs unless a material uses an image texture, so code that needs a mesh's UVs at runtime must build its own
+geometry, as the monitor screen does.
 
 ## Brief template
 

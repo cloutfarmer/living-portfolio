@@ -63,6 +63,12 @@ for mat in bpy.data.materials:
     mat.node_tree.links.remove(link)
     print(f'WARNING: {mat.name}: procedural color flattened; bake to an image to keep the detail')
 
+# The site draws its screens and grain on its own geometry, so UVs only matter when a material samples an image.
+# Without one they were about 20% of the file (docs/DECISIONS.md).
+uses_images = any(
+    node.type == 'TEX_IMAGE' for mat in bpy.data.materials if mat.node_tree for node in mat.node_tree.nodes
+)
+
 bpy.ops.export_scene.gltf(
     filepath=out,
     export_format='GLB',
@@ -74,5 +80,6 @@ bpy.ops.export_scene.gltf(
     export_animations=True,
     # The fingers' shape keys move too little to change their shading, and normals would double their size.
     export_morph_normal=False,
+    export_texcoords=uses_images,
 )
 print(f'Exported {bpy.data.filepath} -> {out}')

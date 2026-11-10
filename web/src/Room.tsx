@@ -117,6 +117,7 @@ function PhotosSkipped() {
 }
 
 // useGLTF has no progress option. The loader is shared, so this only reports on the room's own file.
+// It measures against the decoded size, because the file arrives Brotli-encoded and event.total is the encoded size.
 const reportRoomBytes: NonNullable<Parameters<typeof useGLTF>[3]> = (loader) => {
   const load = loader.load.bind(loader)
   loader.load = (url, onLoad, onProgress, onError) =>
@@ -124,7 +125,7 @@ const reportRoomBytes: NonNullable<Parameters<typeof useGLTF>[3]> = (loader) => 
       url,
       onLoad,
       (event) => {
-        if (url === MODEL_URL && event.total > 0) loadState.roomBytes = Math.min(event.loaded / event.total, 1)
+        if (url === MODEL_URL) loadState.roomBytes = Math.min(event.loaded / __ROOM_BYTES__, 1)
         onProgress?.(event)
       },
       onError,

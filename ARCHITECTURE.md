@@ -62,7 +62,8 @@ The production site is static: `web/dist`, with the personal site copied in at `
 private S3 bucket through CloudFront at `alexsigua.com`, defined in `infra/site.yml` (CloudFormation, us-east-1)
 and uploaded by `web/scripts/deploy.mjs`. There's no server, and the personal site's routes are `#/` hashes, so no
 fallback routing is needed; a CloudFront Function only maps folder paths to `index.html` and `www` to the apex.
-Hashed assets are immutable, HTML always revalidates, and a deploy refuses uncommitted changes. Procedure,
+Hashed assets are immutable, HTML always revalidates, the room's GLB goes up Brotli-encoded
+([decisions](docs/DECISIONS.md)), and a deploy refuses uncommitted changes. Procedure,
 costs, and rollback are in [deploy](docs/DEPLOY.md).
 
 ## Dashboard integration
