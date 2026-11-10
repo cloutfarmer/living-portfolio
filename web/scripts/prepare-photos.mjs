@@ -7,8 +7,8 @@ import { fileURLToPath } from 'node:url'
 // Turns a folder of originals into the pinboard's photos: photo-1.jpg, photo-2.jpg, … in numeric name order.
 // Each is upright, at most LONG_EDGE pixels, JPEG, and carries no EXIF, XMP or IPTC, so no location or camera data
 // ships. The first print on the board (top left) gets photo-1. macOS only: it uses the built-in sips.
-// The wall redraws them as 96-pixel art (PIXEL_ART in PhotoWall.tsx), so 512 leaves room to raise that.
-const LONG_EDGE = 512
+// The wall redraws them as 96-pixel art (PIXEL_ART in PhotoWall.tsx), so 256 is 2.6x what it needs.
+const LONG_EDGE = 256
 // Quality steps down until a photo fits under MOST_BYTES; one that never fits stops the run.
 const QUALITIES = [80, 70, 60]
 const MOST_BYTES = 100_000

@@ -16,6 +16,8 @@ and `www` redirect to `https://alexsigua.com/`. No content is uploaded yet, so t
   invalidates the HTML and the other fixed-name files.
 - **Caching:** files under `assets/` are hashed by Vite, so they're cached for a year. HTML is revalidated
   on every visit. Fixed names (the scene GLB, `og.jpg`) get a day, and every deploy invalidates them.
+  The scene GLB goes up already Brotli-encoded (`Content-Encoding: br`), because CloudFront doesn't compress
+  `model/gltf-binary`; `--dry-run` prints both sizes.
 - `dashboard-build.json`, dotfiles and source maps are never uploaded.
 
 ## Cost
@@ -53,6 +55,8 @@ The stack's budget emails at 80% of $5 a month and when the month is forecast pa
 - `curl -sI https://alexsigua.com/` and `https://alexsigua.com/projects/` return 200 with HSTS.
   `http://` and `https://www.` return 301 to `https://alexsigua.com/`.
 - `curl -sI https://alexsigua.com/dashboard-build.json` returns 404, and `/` carries `content-security-policy`.
+- `curl -sI -H 'Accept-Encoding: br' https://alexsigua.com/corner-desk.glb` shows `content-encoding: br` and
+  `content-type: model/gltf-binary`.
 - In a browser: the room loads, the computer shows the site, and "Skip to portfolio" and
   "Back to the room" work. There are no console errors.
 
