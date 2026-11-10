@@ -67,6 +67,9 @@ stated.
   representative.
 - Real mouse and trackpad feel, a real screen reader, real phones and touch devices, and keyboard-only use of the
   pop-out links.
+- The phone's lock screen on a real iPhone. It's now a flat page laid over the glass, not a CSS 3D transform, which
+  the 1° lens broke in WebKit. Playwright WebKit with iPhone 13 emulation and Chromium at 390x844 and 1440x900 show it
+  on the glass, with the notifications opening Instagram.
 - How the window, loader and pinboard animation feel over a long visit.
 - Poly Pizza license pages block automated reads. Licenses are recorded as copied from those pages, and the source
   URLs of the trophy, bonsai and book props are inferred from file names.
