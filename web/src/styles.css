@@ -299,11 +299,12 @@ body,
   }
 }
 
-/* The room's wall label, a brass-framed plaque. The pointer goes through its words to the scene; only its links take it. */
+/* The room's wall label, a brass-framed plaque, under the view menu where the eye lands first. The pointer goes through
+   its words to the scene; only its button and links take it. */
 .placard {
   position: fixed;
-  bottom: 1.5rem;
-  left: 1.5rem;
+  top: 4rem;
+  left: 1rem;
   max-width: 21rem;
   font-size: 0.9rem;
   line-height: 1.4;
@@ -342,6 +343,29 @@ body,
 
 .placard-blurb {
   margin: 0.7rem 0 0;
+}
+
+/* The placard's one call to action, straight to the computer: the brass frame filled, so it reads as the main way in. */
+.placard-action {
+  display: block;
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem 0.6rem;
+  font-size: 1rem;
+  font-weight: 700;
+  pointer-events: auto;
+}
+
+.placard-action::before {
+  background: linear-gradient(#a87a40, #8c6431 55%, #6f4d24);
+}
+
+.placard-action,
+.placard-action:focus-visible {
+  color: #fbf3e2;
+}
+
+.placard-action::after {
+  border-color: #f3c77a66;
 }
 
 /* Where a recruiter goes next: a row of plain links. */
@@ -388,8 +412,14 @@ body,
   text-shadow: var(--over-scene);
 }
 
-/* Phones: the shortest label, clear of Credits and the hint.
-   The menu wraps to a second row rather than run off the screen. */
+/* Medium windows: the room is smaller, so a shorter label covers less of the pinboard. */
+@media (max-width: 1199px) {
+  .placard-materials {
+    display: none;
+  }
+}
+
+/* Phones: the shortest label, under the menu, which wraps to a second row rather than run off the screen. */
 @media (max-width: 767px) {
   .views {
     right: 1rem;
@@ -397,75 +427,35 @@ body,
   }
 
   .placard {
-    bottom: 3.6rem;
+    top: 6.25rem;
     left: 1rem;
     right: 1rem;
     max-width: none;
     font-size: 0.85rem;
   }
 
-  .placard-materials {
-    display: none;
-  }
-}
-
-/* A slim caption panel. */
-.hint {
-  position: fixed;
-  bottom: 1.5rem;
-  left: 50%;
-  margin: 0;
-  transform: translateX(-50%);
-  font-size: 0.95rem;
-  font-style: italic;
-  white-space: nowrap;
-  pointer-events: none;
-  /* Late, so anyone already exploring never sees it. */
-  animation: hint-in 0.8s ease 2.5s backwards;
-}
-
-/* Medium windows: the centred hint would sit on the placard, so it moves above Credits. */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .hint {
-    right: 1rem;
-    bottom: 4.5rem;
-    left: auto;
-    transform: none;
-  }
-}
-
-/* Words for a mouse or for a finger. */
-.for-touch {
-  display: none;
-}
-
-@media (hover: none) {
-  .for-pointer {
+  /* Shorter, so the monitor's nameplate below stays clear of it. */
+  .placard-materials,
+  .placard-work {
     display: none;
   }
 
-  .for-touch {
-    display: inline;
+  .placard-panel {
+    padding: 0.6rem 0.95rem 0.7rem;
   }
-}
 
-@media (max-width: 767px) {
-  .hint {
-    bottom: 1.3rem;
-    left: 1rem;
-    transform: none;
-    font-size: 0.85rem;
+  .placard-blurb {
+    margin-top: 0.4rem;
   }
-}
 
-.hint-panel {
-  display: block;
-  padding: 0.35rem 0.95rem 0.45rem;
-}
+  .placard-action {
+    margin-top: 0.55rem;
+    padding: 0.4rem 0.9rem 0.5rem;
+  }
 
-@keyframes hint-in {
-  from {
-    opacity: 0;
+  .placard-contact {
+    margin-top: 0.45rem;
+    padding-top: 0.3rem;
   }
 }
 
@@ -548,6 +538,25 @@ body,
   position: absolute;
   bottom: -0.2rem;
   left: -0.18rem;
+}
+
+/* The monitor's unprompted nameplate unfolds after the placard, then its brass frame glows slowly until the visitor
+   reaches the desk. */
+.beckon .nameplate {
+  animation:
+    bubble-unfold 0.32s ease-out 1.4s backwards,
+    beckon 2.6s ease-in-out 2s infinite;
+}
+
+.beckon .bubble-leader {
+  animation-delay: 1.2s;
+}
+
+@keyframes beckon {
+  50% {
+    background: var(--brass-lit);
+    transform: translateY(-0.15rem);
+  }
 }
 
 @keyframes bubble-unfold {
@@ -801,7 +810,8 @@ body,
   .lock-screen,
   .phone-notification,
   .notice-stack-ready .phone-notification,
-  .hint {
+  .beckon .nameplate,
+  .beckon .bubble-leader {
     animation: none;
   }
 
@@ -1033,7 +1043,7 @@ body,
   gap: 0.6rem;
 }
 
-/* "Skip to portfolio": pops out of the room into the full site, from the loader, the view menu and the computer. */
+/* The site link: "Skip to portfolio" on the loader (to the computer view) and "⤢ Full screen" at the computer. */
 .site-link {
   display: inline-block;
 }
@@ -1065,16 +1075,6 @@ body,
   margin-right: 0.2rem;
   font-size: 1.1em;
   line-height: 1;
-}
-
-.views-site {
-  margin-left: 0.6rem;
-  align-self: center;
-}
-
-.views-site .site-link-button {
-  padding: 0.3rem 0.8rem 0.4rem;
-  font-size: 0.9rem;
 }
 
 .intro-site {
@@ -1120,11 +1120,6 @@ body,
     min-height: 44px;
   }
 
-  .views-site .site-link-button {
-    padding-top: 0.7rem;
-    padding-bottom: 0.8rem;
-  }
-
   .credits summary {
     display: flex;
     align-items: center;
@@ -1132,12 +1127,6 @@ body,
   }
 }
 
-/* Phones with the taller Credits target: the placard sits clear above it. */
-@media (pointer: coarse) and (max-width: 767px) {
-  .placard {
-    bottom: 4.5rem;
-  }
-}
 @media(max-width:767px){.intro-site{left:6%;right:auto}}
 .sr-only{position:fixed;top:0;left:0;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 @media(max-width:767px){iframe[title="Projects dashboard"]{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important}}

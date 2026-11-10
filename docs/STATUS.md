@@ -16,7 +16,10 @@ entries.
   - Seasonal skis or surfboard.
   - Candle and blinds reactions.
   - A window with the real sun and moon and live National Weather Service weather.
-  - Credits, a title-fill loader, "Skip to portfolio" and "⤢ Full screen" pop-outs, and a museum placard with contact links.
+  - Credits, a title-fill loader whose "Skip to portfolio" opens the Computer view, a "⤢ Full screen" pop-out, and a
+    museum placard under the view menu with a "See my projects" button and contact links.
+  - Until the visitor first reaches the desk, a glowing "Projects" nameplate over the main monitor points at the
+    computer.
 - **Deferred on purpose:** other routes and content panels. See [decisions](DECISIONS.md).
 
 ## Last verified
@@ -53,6 +56,11 @@ stated.
   computer returns to the Desk view with no page errors.
 - **Failure paths** (production preview): a failed GLB or no WebGL shows the name, role, portfolio and contact links;
   a failed photo hides only the pinboard. With JavaScript off, the contact links also show.
+- **Landing guidance** (dev server, 1440x900, 1024x768 and 390x844): the placard sits under the menu with no overlap
+  of the menu, Credits or the monitor nameplate. "See my projects" opens the Computer view with the live site;
+  "Leave computer" focuses "Desk", and back in the room the nameplate is gone. Reduced motion stops the nameplate's
+  glow. The loader's "Skip to portfolio" lands on the Computer view with the live site, 0 page errors. At 1024x768
+  the placard covers most of the pinboard.
 - **Accessibility:** one live region announces each view, and leaving the computer or phone returns focus to "Desk".
 - **CSP:** the production build, served with the exact header from `infra/site.yml`, logs 0 page errors, 0 console
   errors and 0 CSP violations through Room, Desk, Projects, Fitness, Pinboard, "Skip to portfolio" and "Back to the

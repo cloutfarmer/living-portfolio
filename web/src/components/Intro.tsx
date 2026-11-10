@@ -30,7 +30,7 @@ const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 
 
 // The name shows from the first paint, and light fills the title as the room loads. When it's full, the title
 // glows once and the room opens outward from it.
-export function Intro({ onEnter, onDone }: { onEnter: () => void; onDone: () => void }) {
+export function Intro({ onEnter, onDone, onSkip }: { onEnter: () => void; onDone: () => void; onSkip: () => void }) {
   const layer = useRef<HTMLDivElement>(null)
   const title = useRef<HTMLDivElement>(null)
   const meter = useRef<HTMLDivElement>(null)
@@ -205,8 +205,9 @@ export function Intro({ onEnter, onDone }: { onEnter: () => void; onDone: () => 
           </p>
         </div>
       </div>
-      {/* Visitors who want the plain site don't have to wait for the room. */}
-      <SiteLink className="intro-site" style={rise(0.3)} />
+      {/* Visitors who came for the work land on the computer's screen as soon as the room opens; Full screen is one
+          click from there. The click also skips the loader's holds, like any click. */}
+      <SiteLink className="intro-site" style={rise(0.3)} onOpen={onSkip} />
     </div>
   )
 }

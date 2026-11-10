@@ -12,8 +12,8 @@ import { Room, type View } from './Room'
 
 const VIEWS: { name: View; label: string }[] = [
   { name: 'ROOM', label: 'Room' },
-  { name: 'DESK', label: 'Desk' },
   { name: 'COMPUTER', label: 'Projects' },
+  { name: 'DESK', label: 'Desk' },
   { name: 'PHONE', label: 'Fitness' },
 ]
 
@@ -34,6 +34,7 @@ export function App() {
   // Entered as the room starts to appear; the intro's layer goes once the light has filled the screen.
   const [entered, setEntered] = useState(false)
   const [introGone, setIntroGone] = useState(false)
+  // Once the visitor has reached the desk, the computer or the phone, the room stops pointing at the computer.
   const [seenDesk, setSeenDesk] = useState(false)
   // The pinboard's prints have separated and the camera has come close: the nearest the photos get.
   // Keyboard users reach it from the Photos button.
@@ -44,9 +45,10 @@ export function App() {
   const show = useCallback((next: View) => {
     setView(next)
     setBoard(false)
-    if (next === 'DESK' || next === 'PHONE') setSeenDesk(true)
+    if (next !== 'ROOM') setSeenDesk(true)
   }, [])
   const handleSelectDesk = useCallback(() => show('DESK'), [show])
+  const handleProjects = useCallback(() => show('COMPUTER'), [show])
   const handleOpenBoard = useCallback(() => setBoard(true), [])
 
   // One level back: the board or the desk to the room, the computer or phone to the desk.
@@ -107,7 +109,7 @@ export function App() {
         >
           <color attach="background" args={['#0b0717']} />
           <Suspense fallback={null}>
-            <Room view={view} board={board} onSelectDesk={handleSelectDesk} onOpenBoard={handleOpenBoard} onSelectComputer={() => show('COMPUTER')} onSelectPhone={() => show('PHONE')} />
+            <Room view={view} board={board} guide={entered && !seenDesk} onSelectDesk={handleSelectDesk} onOpenBoard={handleOpenBoard} onSelectComputer={handleProjects} onSelectPhone={() => show('PHONE')} />
           </Suspense>
           <EffectComposer multisampling={COARSE ? 2 : 4}>
             {/* Only values above the threshold glow: candle flames and bright highlights. */}
@@ -116,7 +118,7 @@ export function App() {
             <Vignette offset={0.35} darkness={0.55} />
           </EffectComposer>
         </Canvas>
-        <Placard visible={entered && view === 'ROOM' && !board} />
+        <Placard visible={entered && view === 'ROOM' && !board} onProjects={handleProjects} />
       </main>
       {view === 'COMPUTER' && (
         <div className="leave leave-computer">
@@ -152,17 +154,7 @@ export function App() {
         >
           Pinboard
         </button>
-        {/* At the computer it sits beside "Leave computer" instead. */}
-        {view !== 'COMPUTER' && <SiteLink className="views-site" />}
       </nav>
-      {entered && !seenDesk && !board && view !== 'COMPUTER' && (
-        <p className="hint panel-cast">
-          <span className="panel hint-panel">
-            <span className="for-pointer">Click</span>
-            <span className="for-touch">Tap</span> the desk to take a closer look
-          </span>
-        </p>
-      )}
       <p className="sr-only" role="status">
         {entered ? ANNOUNCE[board ? 'BOARD' : view] : ''}
       </p>
@@ -236,7 +228,7 @@ export function App() {
       </details>
       {/* The key restarts its fade on each view change, which is how reduced motion changes views. */}
       <div key={`${view}:${board}`} className="curtain" aria-hidden="true" />
-      {!introGone && <Intro onEnter={handleEnter} onDone={handleIntroDone} />}
+      {!introGone && <Intro onEnter={handleEnter} onDone={handleIntroDone} onSkip={handleProjects} />}
     </LoadBoundary>
   )
 }
