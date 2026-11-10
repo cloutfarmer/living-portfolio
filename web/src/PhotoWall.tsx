@@ -84,6 +84,10 @@ function viewOf(z: number, y: number, width: number, height: number, margin: num
   }
 }
 
+// How far in front of the wall the board view still draws. The side table reaches 0.375 from the wall and the desk
+// starts 0.78 out, so this keeps the table whole and leaves out the end of the desk, which a tall screen would show.
+export const BOARD_CLIP = 0.6
+
 /** Where the camera goes to take in the whole board. */
 export function boardPose(size: { width: number; height: number }) {
   return viewOf(BOARD.z, BOARD.y, BOARD.width + BOARD.edge * 2, BOARD.height + BOARD.edge * 2, BOARD_MARGIN, size)

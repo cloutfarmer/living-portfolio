@@ -23,7 +23,7 @@ import { Nameplate, NAMEPLATES } from './components/Nameplate'
 import { REACTIVE, Reactions } from './Reactions'
 import { Stink } from './Stink'
 import { loadState } from './loading'
-import { BOARD_FACE, boardPose, PhotoWall } from './PhotoWall'
+import { BOARD_CLIP, BOARD_FACE, boardPose, PhotoWall } from './PhotoWall'
 import { Monitor, SEATED_DISTANCE, surface } from './components/Monitor'
 import { Phone, phoneSurface } from './components/Phone'
 import { CANDLE_IN_SUN, Outdoors, useSky } from './Outdoors'
@@ -363,7 +363,7 @@ export function Room({
   const shot = useMemo(() => {
     if (!shots) return null
     if (closing) return shots.COMPUTER
-    return board ? shotFrom(boardPose(size), size.height) : shots[view]
+    return board ? { ...shotFrom(boardPose(size), size.height), clip: BOARD_CLIP } : shots[view]
   }, [shots, view, board, closing, size])
   const leanShot = useMemo(() => {
     return shots && lean ? shots[lean] : null
