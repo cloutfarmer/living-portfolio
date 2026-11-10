@@ -1,8 +1,10 @@
 # Deploy
 
-How the room and the personal site go live at `alexsigua.com`. The domain is registered (auto-renew on), the stack
-`living-portfolio-site` is up, and the first release went live by hand with the [manual fallback](#manual-fallback).
-GitHub Actions deploys are set up as below and are unvalidated until a first run passes.
+How the room and the personal site go live at `alexsigua.com`. The domain is registered (auto-renew on) and the stack
+`living-portfolio-site` was created on November 9, 2026, and `http://` and `www` redirect to `https://alexsigua.com/`.
+The first release went live on November 10, 2026 by hand (a stack update, then `deploy.mjs`, now the
+[manual fallback](#manual-fallback)), and the post-deploy checks passed. GitHub Actions deploys are set up as below
+and are unvalidated until a first run passes.
 
 ## What runs where
 

@@ -194,7 +194,8 @@ export function Room({
   onSelectComputer: () => void
   onSelectPhone: () => void
 }) {
-  const { scene, animations } = useGLTF(MODEL_URL, undefined, undefined, reportRoomBytes)
+  // No Draco or meshopt: the room is plain glTF, and meshopt's WASM decoder would break the CSP's script-src 'self'.
+  const { scene, animations } = useGLTF(MODEL_URL, false, false, reportRoomBytes)
   const { actions } = useAnimations(animations, scene)
   const size = useThree((state) => state.size)
   const gl = useThree((state) => state.gl)
