@@ -1,8 +1,9 @@
 # Deploy
 
 How the room and the personal site go live at `alexsigua.com`. The domain is registered (auto-renew on) and the stack
-`living-portfolio-site` was created on November 9, 2026: HTTPS answers (404 while the bucket is empty), and `http://`
-and `www` redirect to `https://alexsigua.com/`. No content is uploaded yet, so the release steps are unvalidated.
+`living-portfolio-site` was created on November 9, 2026, and `http://` and `www` redirect to `https://alexsigua.com/`.
+The first release went live on November 10, 2026 with the steps below (a stack update, then `deploy.mjs`), and the
+post-deploy checks passed.
 
 ## What runs where
 

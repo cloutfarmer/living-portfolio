@@ -54,8 +54,10 @@ stated.
 - **Failure paths** (production preview): a failed GLB or no WebGL shows the name, role, portfolio and contact links;
   a failed photo hides only the pinboard. With JavaScript off, the contact links also show.
 - **Accessibility:** one live region announces each view, and leaving the computer or phone returns focus to "Desk".
-- **CSP:** the policy in `infra/site.yml`, injected on every response, reported 0 violations across all views and
-  `/projects/` (production preview). Live headers wait on a stack update.
+- **CSP:** the production build, served with the exact header from `infra/site.yml`, logs 0 page errors, 0 console
+  errors and 0 CSP violations through Room, Desk, Projects, Fitness, Pinboard, "Skip to portfolio" and "Back to the
+  room". An earlier check missed a `WebAssembly.instantiate()` page error on every load, from drei's default meshopt
+  decoder; the room now loads with Draco and meshopt off. The live site sends the header.
 - **Builds:** `npm run build`, `npm test` and `check-screen-animation.mjs` pass. CI runs `npm ci`, the build,
   `npm test`, the diff check, the repository scan, the public-safety check and `kit-check`. It doesn't render the scene.
 
