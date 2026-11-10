@@ -1,0 +1,31 @@
+name: ci
+
+# Owned by this project. Run only checks that are safe and need no production credentials.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # the public-safety check reads every commit's author and committer
+          persist-credentials: false
+      # v4.4.0. First, so every step gets Node 22.18+: check-public.mjs needs zlib's zstd.
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22.18
+      - name: Diff check
+        run: git diff --check
+      - name: Repository scan
+        run: node .agent/repository-scan.mjs
+      - name: Public-safety check
+        run: node scripts/check-public.mjs

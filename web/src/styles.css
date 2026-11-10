@@ -1,0 +1,1009 @@
+/* Self-hosted Alegreya, cut down to Latin by Google Fonts. See assets/ASSET_MANIFEST.csv. */
+@font-face {
+  font-family: Alegreya;
+  src: url('./assets/fonts/alegreya-roman.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Alegreya;
+  src: url('./assets/fonts/alegreya-italic.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  --serif: Alegreya, Georgia, 'Times New Roman', serif;
+  --over-scene: 0 1px 2px #0b0717cc, 0 0 14px #0b071799;
+  /* The storybook adventure-game panels: parchment in a brass frame. */
+  --brass: #8c6431;
+  --brass-lit: #f3c77a;
+  --panel-ink: #2e2116;
+  --panel-label-ink: #7a4f22;
+  --panel-corner: 0.55rem;
+  --panel-cast: drop-shadow(2px 3px 0 #0b071799);
+}
+
+/* Parchment in a brass frame with cut corners. The clip-path would cut off any shadow, so a parent casts it with
+   .panel-cast, hard like a sprite's. */
+.panel {
+  position: relative;
+  z-index: 0;
+  background: var(--brass);
+  color: var(--panel-ink);
+  font-family: var(--serif);
+  text-shadow: none;
+  clip-path: polygon(var(--panel-corner) 0, calc(100% - var(--panel-corner)) 0, 100% var(--panel-corner),
+    100% calc(100% - var(--panel-corner)), calc(100% - var(--panel-corner)) 100%, var(--panel-corner) 100%,
+    0 calc(100% - var(--panel-corner)), 0 var(--panel-corner));
+}
+
+.panel-cast {
+  filter: var(--panel-cast);
+}
+
+/* The parchment, inset from the brass so the frame shows around it, with the same cut corners. */
+.panel::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  z-index: -1;
+  background: linear-gradient(#f4ead4, #efe3c8 55%, #e5d3ad);
+  clip-path: polygon(calc(var(--panel-corner) - 1px) 0, calc(100% - var(--panel-corner) + 1px) 0, 100% calc(var(--panel-corner) - 1px),
+    100% calc(100% - var(--panel-corner) + 1px), calc(100% - var(--panel-corner) + 1px) 100%, calc(var(--panel-corner) - 1px) 100%,
+    0 calc(100% - var(--panel-corner) + 1px), 0 calc(var(--panel-corner) - 1px));
+  transition: filter 0.15s ease-out;
+}
+
+/* A hairline just inside, far enough in that the cut corners never reach it. */
+.panel::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  z-index: -1;
+  border: 1px solid #8c643159;
+  pointer-events: none;
+}
+
+button.panel {
+  border: 0;
+  font: inherit;
+  font-family: var(--serif);
+  cursor: pointer;
+}
+
+button.panel:hover::before,
+button.panel:focus-visible::before {
+  filter: brightness(1.06) saturate(1.1);
+}
+
+/* The clip-path would cut off an outline, so focus turns the frame bright and thicker instead. */
+button.panel:focus-visible {
+  outline: none;
+  background: var(--brass-lit);
+}
+
+button.panel:focus-visible::before {
+  inset: 3px;
+}
+
+.panel-label {
+  display: block;
+  padding-bottom: 0.2rem;
+  border-bottom: 1px solid #8c643166;
+  color: var(--panel-label-ink);
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* The small gold diamond that ends the panels' leaders and marks the current view. */
+.bubble-leader::after,
+.views button[aria-current]::after {
+  width: 0.36rem;
+  height: 0.36rem;
+  background: var(--brass-lit);
+  box-shadow: 0 0 0 1px var(--brass);
+  transform: rotate(45deg);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  background: #0b0717;
+  color: #f3e6d3;
+  font-family: system-ui, sans-serif;
+}
+
+.views {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  display: flex;
+  gap: 0.15rem;
+  font-family: var(--serif);
+  font-size: 0.95rem;
+}
+
+.views,
+.credits {
+  opacity: 0;
+}
+
+.controls-in {
+  opacity: 1;
+  transition: opacity 0.8s ease 0.9s;
+}
+
+.views button {
+  position: relative;
+  padding: 0.35rem 0.6rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-shadow: var(--over-scene);
+  cursor: pointer;
+}
+
+/* The current view is marked with the leaders' diamond, centred under its word. */
+.views button[aria-current] {
+  font-style: italic;
+}
+
+.views button[aria-current]::after {
+  content: '';
+  position: absolute;
+  bottom: -0.05rem;
+  left: calc(50% - 0.18rem);
+}
+
+.views button:focus-visible {
+  outline: 2px solid #f3e6d3;
+  outline-offset: 2px;
+}
+
+/* Restarted on each view change, which is how reduced motion changes views. Otherwise it stays invisible. */
+.curtain {
+  position: fixed;
+  inset: 0;
+  background: #0b0717;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* index.html hides its plain intro until this stylesheet arrives. */
+#intro-static {
+  visibility: visible;
+}
+
+/* The first launch: the name from the first paint, and light filling the title as the room loads. */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 20000000;
+  background: #0b0717;
+  color: #f3e6d3;
+  font-family: var(--serif);
+  overflow: hidden;
+}
+
+.intro-leaving {
+  pointer-events: none;
+}
+
+/* Slightly above the middle, where centred words look centred. */
+.intro-words {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6% 8vh;
+  text-align: center;
+  transition: opacity 0.45s ease;
+}
+
+.intro-leaving .intro-words {
+  opacity: 0;
+}
+
+/* The status hangs below the title, so a longer line never moves the title. */
+.intro-centre {
+  position: relative;
+}
+
+.intro-title {
+  animation: intro-rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.intro-name {
+  display: block;
+  margin-bottom: 0.6rem;
+  font-size: 1.25rem;
+  font-style: italic;
+  font-weight: 300;
+  letter-spacing: 0.01em;
+  opacity: 0.9;
+}
+
+.intro-work {
+  display: block;
+  font-size: clamp(2.1rem, 5.2vw, 4.75rem);
+  font-weight: 300;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  color: #f3e6d338;
+}
+
+.intro-word {
+  display: inline-block;
+}
+
+/* --p is the load, 0 to 1, set by Intro.tsx. Each letter's light runs 0 to 1 over a two-letter edge, and the edge
+   itself is warmer, like the lit side of a flame. */
+.intro-letter {
+  --lit: clamp(0, calc((var(--p, 0) * (var(--n) + 2) - var(--i)) / 2), 1);
+  --edge: calc(var(--lit) * (1 - var(--lit)) * 4);
+  color: color-mix(in oklab, #e7a977 calc(var(--edge) * 100%), color-mix(in oklab, #f3e6d3 calc(var(--lit) * 100%), #f3e6d338));
+  text-shadow: 0 0 0.4em color-mix(in srgb, #ff9a4d calc(var(--lit) * 30%), transparent);
+}
+
+.intro-swell {
+  animation: intro-swell 0.3s ease-out;
+}
+
+.intro-status {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 88vw;
+  margin: 1.6rem 0 0 -44vw;
+  font-size: 1rem;
+  font-style: italic;
+  font-weight: 300;
+  font-feature-settings: 'onum';
+  opacity: 0.8;
+  animation: intro-rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.15s both;
+}
+
+/* A return visit only sees this if the room is somehow slow. */
+.intro-returning .intro-words {
+  animation: intro-late 0.4s ease 0.5s backwards;
+}
+
+@keyframes intro-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+
+@keyframes intro-swell {
+  50% {
+    filter: brightness(1.15) drop-shadow(0 0 0.35em #ff9a4d55);
+  }
+}
+
+@keyframes intro-late {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The room's wall label, a brass-framed plaque. It only holds words, so the pointer goes straight through to the scene. */
+.placard {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  max-width: 21rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  font-feature-settings: 'onum';
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.placard-visible {
+  opacity: 1;
+  transition: opacity 0.8s ease 0.9s;
+}
+
+.placard-panel {
+  padding: 0.7rem 1.1rem 0.85rem;
+}
+
+.placard h1 {
+  margin: 0;
+  font: inherit;
+}
+
+.placard .panel-label {
+  margin-bottom: 0.35rem;
+}
+
+.placard-work {
+  display: block;
+}
+
+.placard-materials {
+  margin: 0;
+  color: #5e4a33;
+}
+
+.placard-blurb {
+  margin: 0.7rem 0 0;
+}
+
+/* Phones: the shortest label, clear of Credits and the hint.
+   The menu wraps to a second row rather than run off the screen. */
+@media (max-width: 767px) {
+  .views {
+    right: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .placard {
+    bottom: 3.6rem;
+    left: 1rem;
+    right: 1rem;
+    max-width: none;
+    font-size: 0.85rem;
+  }
+
+  .placard-materials {
+    display: none;
+  }
+}
+
+/* A slim caption panel. */
+.hint {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  margin: 0;
+  transform: translateX(-50%);
+  font-size: 0.95rem;
+  font-style: italic;
+  white-space: nowrap;
+  pointer-events: none;
+  /* Late, so anyone already exploring never sees it. */
+  animation: hint-in 0.8s ease 5s backwards;
+}
+
+@media (max-width: 767px) {
+  .hint {
+    bottom: 1.3rem;
+    left: 1rem;
+    transform: none;
+    font-size: 0.85rem;
+  }
+}
+
+.hint-panel {
+  display: block;
+  padding: 0.35rem 0.95rem 0.45rem;
+}
+
+@keyframes hint-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Captions pinned to things in the scene: the desk bubbles, which click, and the room's nameplates, which only name
+   what the pointer rests on. A .panel unfolds above a fine leader down to the item, without overshoot, and holds still. */
+.bubble {
+  position: absolute;
+  bottom: 0.4rem;
+  left: 0;
+  width: max-content;
+  transform: translateX(-50%);
+}
+
+.bubble-panel {
+  /* Slides the panel off what's behind it, such as the candle. The leader stays on the item. */
+  left: var(--nudge, 0);
+  display: block;
+  max-width: 14rem;
+  margin-bottom: 1.6rem;
+  padding: 0.55rem 1.05rem 0.7rem;
+  text-align: center;
+  /* The bubble's Html passes the pointer through, so only the panel can be clicked. */
+  pointer-events: auto;
+  animation: bubble-unfold 0.32s ease-out calc(var(--delay, 0s) + 0.18s) backwards;
+}
+
+/* A nameplate only names, so the pointer stays on the thing it names. */
+.nameplate {
+  padding: 0.4rem 0.85rem 0.5rem;
+  pointer-events: none;
+  animation-duration: 0.2s;
+  animation-delay: 0.1s;
+}
+
+.bubble-panel .panel-label {
+  margin: 0 auto 0.3rem;
+}
+
+.bubble-blurb {
+  display: block;
+  font-size: 0.86rem;
+  font-style: italic;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+.nameplate .bubble-blurb {
+  font-size: 0.78rem;
+}
+
+@media (max-width: 767px) {
+  .bubble-panel {
+    max-width: 9.5rem;
+    padding: 0.45rem 0.8rem 0.55rem;
+  }
+
+  .bubble-panel .panel-label {
+    font-size: 0.64rem;
+  }
+
+  .bubble-blurb {
+    font-size: 0.74rem;
+  }
+}
+
+/* A fine brass line from the item up to the panel, ending in a small diamond on the item. */
+.bubble-leader {
+  position: absolute;
+  bottom: 0.2rem;
+  left: 50%;
+  width: 1px;
+  height: 1.4rem;
+  background: var(--brass);
+  transform-origin: bottom;
+  animation: bubble-draw 0.18s ease-out var(--delay, 0s) backwards;
+}
+
+.bubble-leader::after {
+  content: '';
+  position: absolute;
+  bottom: -0.2rem;
+  left: -0.18rem;
+}
+
+@keyframes bubble-unfold {
+  from {
+    opacity: 0;
+    transform: translateY(0.3rem) scaleY(0.85);
+  }
+}
+
+@keyframes bubble-draw {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+/* The phone's lock screen, lit from dark when the camera arrives. The wallpaper is the room's candlelight. */
+.lock-screen {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: radial-gradient(130% 75% at 30% 105%, #e8995a 0%, #b0554c 30%, #57294a 62%, #1b1226 100%);
+  color: #fff;
+  font-family: system-ui, -apple-system, sans-serif;
+  animation: phone-wake 0.55s ease-out backwards;
+}
+
+.lock-date,
+.lock-time {
+  position: absolute;
+  width: 100%;
+  margin: 0;
+  text-align: center;
+  text-shadow: 0 1px 12px #0003;
+}
+
+.lock-date {
+  top: 64px;
+  font-size: 19px;
+  font-weight: 500;
+  opacity: 0.92;
+}
+
+.lock-time {
+  top: 88px;
+  font-size: 104px;
+  font-weight: 600;
+  letter-spacing: -3px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.lock-home {
+  position: absolute;
+  bottom: 9px;
+  left: 50%;
+  width: 124px;
+  height: 5px;
+  border-radius: 3px;
+  background: #fffd;
+  transform: translateX(-50%);
+}
+
+/* New notifications rise into the lower half, above the home bar. */
+.notice-stack {
+  position: absolute;
+  right: 12px;
+  bottom: 96px;
+  left: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.phone-notification {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  padding: 13px 14px;
+  border-radius: 20px;
+  background: #ffffff42;
+  backdrop-filter: blur(18px) saturate(1.4);
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 6px 20px #0003;
+  animation: notice-in 0.5s cubic-bezier(0.2, 1.25, 0.4, 1) backwards;
+  transition: background 0.2s ease-out, transform 0.2s ease-out;
+}
+
+.phone-notification:hover,
+.phone-notification:focus-visible {
+  background: #ffffff5c;
+  transform: translateY(-2px);
+}
+
+/* Once both are in, they pulse once to show they can be tapped. */
+.notice-stack-ready .phone-notification {
+  animation:
+    notice-in 0.5s cubic-bezier(0.2, 1.25, 0.4, 1) backwards,
+    notice-hint 0.7s ease-in-out 0.6s;
+}
+
+.notice-open {
+  flex: none;
+  align-self: center;
+  font-size: 18px;
+  opacity: 0.75;
+  transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+}
+
+.phone-notification:hover .notice-open,
+.phone-notification:focus-visible .notice-open {
+  opacity: 1;
+  transform: translate(2px, -2px);
+}
+
+.phone-notification:focus-visible {
+  outline: 3px solid #f6eddd;
+  outline-offset: 3px;
+}
+
+.notice-icon {
+  flex: none;
+  width: 40px;
+  height: 40px;
+}
+
+.notice-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.notice-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+}
+
+.notice-head span {
+  opacity: 0.7;
+  font-size: 13px;
+}
+
+.notice-line {
+  display: block;
+  margin-top: 1px;
+  font-size: 15px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.notice-line strong {
+  font-weight: 600;
+}
+
+@keyframes phone-wake {
+  from {
+    opacity: 0;
+    filter: brightness(2.2);
+  }
+}
+
+@keyframes notice-in {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.94);
+  }
+}
+
+@keyframes notice-hint {
+  50% {
+    background: #ffffff70;
+    transform: scale(1.035);
+  }
+}
+
+/* The phone's museum label, a plaque like the landing placard. It sits right of the phone, whose body is about 0.31 of
+   the window's height either side of centre when the shot fills by height. */
+.phone-guide {
+  position: fixed;
+  top: 50%;
+  left: calc(50% + 31vh + 2rem);
+  max-width: 18rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  font-feature-settings: 'onum';
+  transform: translateY(-50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+/* Waits for both notifications to arrive. */
+.phone-guide-visible {
+  opacity: 1;
+  transition: opacity 0.8s ease 2.9s;
+}
+
+.phone-guide-full {
+  padding: 0.7rem 1.1rem 0.85rem;
+}
+
+.phone-guide p {
+  margin: 0 0 0.7rem;
+}
+
+.phone-guide strong {
+  font-weight: 700;
+}
+
+.phone-guide .panel-label {
+  margin-bottom: 0.6rem;
+}
+
+.phone-guide .phone-guide-tap {
+  margin: 1rem 0 0;
+  font-style: italic;
+}
+
+.phone-guide-short {
+  display: none;
+}
+
+/* No room beside the phone: one line under the view buttons instead. */
+@media (max-width: 767px), (max-aspect-ratio: 5/4) {
+  .phone-guide {
+    top: 3.4rem;
+    left: 50%;
+    /* Over the phone's own screen: drei's Html layers up to 16777271 unless told otherwise. */
+    z-index: 16777272;
+    width: min(26rem, calc(100vw - 2rem));
+    max-width: none;
+    font-size: 0.8rem;
+    text-align: center;
+    transform: translateX(-50%);
+  }
+
+  .phone-guide-full {
+    display: none;
+  }
+
+  .phone-guide .phone-guide-short {
+    display: block;
+    margin: 0;
+    padding: 0.4rem 0.9rem 0.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bubble-panel,
+  .bubble-leader,
+  .lock-screen,
+  .phone-notification,
+  .notice-stack-ready .phone-notification,
+  .hint {
+    animation: none;
+  }
+
+  .curtain {
+    animation: curtain-lift 0.25s ease-out;
+  }
+
+  .intro-title,
+  .intro-status,
+  .intro-swell,
+  .intro-returning .intro-words {
+    animation: none;
+  }
+
+  .intro {
+    transition: opacity 0.25s ease;
+  }
+
+  .intro-leaving {
+    opacity: 0;
+  }
+
+  .controls-in,
+  .placard,
+  .placard-visible,
+  .phone-guide {
+    transition: none;
+  }
+
+  /* No fade, but still after both notifications, which arrive at once when the camera doesn't fly. */
+  .phone-guide-visible {
+    transition: opacity 0s 1.7s;
+  }
+}
+
+@keyframes curtain-lift {
+  from {
+    opacity: 1;
+  }
+}
+
+.credits {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  max-width: 24rem;
+  padding: 0.3rem 0;
+  font-family: var(--serif);
+  font-size: 0.85rem;
+}
+
+.credits summary {
+  padding: 0 0.8rem;
+  cursor: pointer;
+  text-align: right;
+  text-shadow: var(--over-scene);
+}
+
+.credits summary:focus-visible {
+  outline: 2px solid #f3e6d3;
+  outline-offset: 2px;
+}
+
+/* Opened, the list is a parchment ledger. */
+.credits ul {
+  margin: 0.4rem 0 0;
+  padding: 0.65rem 1rem 0.75rem;
+  line-height: 1.35;
+  list-style: none;
+}
+
+.credits a {
+  color: #6b4420;
+}
+
+.credits a:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 1px;
+}
+
+.message {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+/* PARKED with AltTab.tsx for a future easter egg: the window switcher. Sizes are in the screen's own 1440-wide pixels. */
+/* Colours follow the Night shift site it opens: graphite panel, hairline border, amber selection. */
+.alt-tab {
+  position: absolute;
+  inset: 0;
+  color: #e6e3dc;
+  font-family: system-ui, sans-serif;
+}
+
+.alt-tab img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.alt-tab-editor,
+.alt-tab-window {
+  position: absolute;
+  inset: 0;
+}
+
+.alt-tab-panel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  gap: 32px;
+  padding: 28px 28px 72px;
+  border: 1px solid #343a45;
+  border-radius: 22px;
+  background: #0b0d10eb;
+  box-shadow: 0 24px 70px #000c, 0 0 0 1px #0b0d10;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.94);
+  transition: opacity 0.1s ease, transform 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.alt-tab-panel .alt-tab-tile {
+  flex: none;
+  width: 288px;
+  height: 177px;
+  overflow: hidden;
+  border-radius: 10px;
+  outline: 4px solid transparent;
+  outline-offset: 5px;
+  transition: outline-color 0.1s ease, box-shadow 0.1s ease;
+}
+
+.alt-tab-panel .alt-tab-tile-on {
+  outline-color: #f2b53a;
+  box-shadow: 0 0 28px #f2b53a59;
+}
+
+.alt-tab-label {
+  position: absolute;
+  right: 0;
+  bottom: 22px;
+  left: 0;
+  font-size: 24px;
+  letter-spacing: 0.01em;
+  text-align: center;
+}
+
+.alt-tab-step-panel .alt-tab-panel,
+.alt-tab-step-selected .alt-tab-panel {
+  opacity: 1;
+  transform: translate(-50%, -50%);
+}
+
+/* Starts exactly over the Projects tile: half a tile and half a gap right, and up by half the label's space. */
+.alt-tab-window {
+  opacity: 0;
+  transform: translate(160px, -22px) scale(0.2);
+}
+
+.alt-tab-step-opening .alt-tab-window,
+.alt-tab-step-revealing .alt-tab-window {
+  opacity: 1;
+  transform: none;
+  transition: transform 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* The window and editor fade together, uncovering the live page beneath. */
+.alt-tab-step-revealing .alt-tab-window,
+.alt-tab-step-revealing .alt-tab-editor {
+  opacity: 0;
+  transition: opacity 0.14s ease;
+}
+
+/* The live page fades in over the monitor's picture of it once loaded, and back out on leaving. */
+.screen-live {
+  position: relative;
+  opacity: 0;
+  transition: opacity 0.26s ease;
+}
+
+.screen-live-shown {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen-live {
+    transition: none;
+  }
+}
+
+/* Leaving the computer or phone: a framed panel button, top right, over the device's own screen. */
+.leave {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000000;
+}
+
+/* At the computer, the site link sits beside "Leave computer". */
+.leave-computer {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* "Skip to portfolio": pops out of the room into the full site, from the loader, the view menu and the computer. */
+.site-link {
+  display: inline-block;
+}
+
+.site-link-button {
+  display: block;
+  padding: 0.6rem 1.15rem 0.7rem;
+  font-size: 1rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-link-button:hover,
+.site-link-button:focus-visible {
+  background: var(--brass-lit);
+}
+
+.site-link-button:focus-visible {
+  outline: 2px solid #f3e6d3;
+  outline-offset: 3px;
+}
+
+.site-link-icon {
+  display: inline-block;
+  margin-right: 0.2rem;
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+.views-site {
+  margin-left: 0.6rem;
+  align-self: center;
+}
+
+.views-site .site-link-button {
+  padding: 0.3rem 0.8rem 0.4rem;
+  font-size: 0.9rem;
+}
+
+.intro-site {
+  position: absolute;
+  right: 6%;
+  bottom: 7%;
+  animation: intro-rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.3s both;
+  transition: opacity 0.45s ease;
+}
+
+.intro-leaving .intro-site {
+  opacity: 0;
+}
+
+.leave-button {
+  display: block;
+  padding: 0.6rem 1.15rem 0.7rem;
+  font-size: 1rem;
+}
+/* Narrow windows have no room beside the view buttons. */
+@media(max-width:767px){.leave-phone{top:auto;right:auto;bottom:20px;left:20px}}
+/* On phones the site fills the window, and its own header is at the top, so the two buttons sit at the bottom. */
+@media(max-width:767px){.leave-computer{top:auto;right:16px;bottom:16px;left:16px;justify-content:space-between}}
+@media(max-width:767px){.intro-site{left:6%;right:auto}}
+.sr-only{position:fixed;top:0;left:0;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+@media(max-width:767px){iframe[title="Projects dashboard"]{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important}}

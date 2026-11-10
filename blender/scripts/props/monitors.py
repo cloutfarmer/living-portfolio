@@ -1,0 +1,28 @@
+from lib.builders import box
+
+
+def build():
+    box('Main_Display', (-0.57, 0.821, 1.75), (0.67, 0.009, 0.42), 'Monitor_Screen', bevel=0.012)
+    box('Main_Display_header', (-0.57, 0.818, 1.925), (0.65, 0.005, 0.027), 'Monitor_Accent', bevel=0.012)
+    box('Main_Display_line', (-0.66, 0.818, 1.87), (0.34, 0.005, 0.009), 'Monitor_Text', bevel=0.012)
+    box('Main_Display_line.001', (-0.66, 0.818, 1.823), (0.285, 0.005, 0.009), 'Monitor_Text', bevel=0.012)
+    box('Main_Display_line.002', (-0.66, 0.818, 1.776), (0.23, 0.005, 0.009), 'Monitor_Text', bevel=0.012)
+    box('Main_Display_line.003', (-0.66, 0.818, 1.729), (0.34, 0.005, 0.009), 'Monitor_Text', bevel=0.012)
+    box('Main_Display_line.004', (-0.66, 0.818, 1.682), (0.285, 0.005, 0.009), 'Monitor_Text', bevel=0.012)
+    box('Main_Display_line.005', (-0.66, 0.818, 1.635), (0.23, 0.005, 0.009), 'Monitor_Text', bevel=0.012)
+    box('Main_Monitor_base', (-0.57, 0.85, 1.28), (0.3, 0.24, 0.045), 'Charcoal', bevel=0.012)
+    box('Main_Monitor_frame', (-0.57, 0.85, 1.75), (0.73, 0.065, 0.49), 'Charcoal', bevel=0.012)
+    box('Main_Monitor_stem', (-0.57, 0.885, 1.47), (0.055, 0.065, 0.35), 'Charcoal', bevel=0.012)
+    box('Main_Power_indicator', (-0.28, 0.8205, 1.525), (0.014, 0.008, 0.005), 'Monitor_Text', bevel=0.012)
+    box('Right_Display', (0.14339, 0.85176, 1.75), (0.67, 0.009, 0.42), 'Monitor_Screen', rot=(0, 0, -0.23), bevel=0.012)
+    box('Right_Display_header', (0.14270, 0.84884, 1.925), (0.65, 0.005, 0.027), 'Monitor_Accent', rot=(0, 0, -0.23), bevel=0.012)
+    box('Right_Display_line', (0.05507, 0.86935, 1.87), (0.34, 0.005, 0.009), 'Monitor_Text', rot=(0, 0, -0.23), bevel=0.012)
+    box('Right_Display_line.001', (0.05507, 0.86935, 1.823), (0.285, 0.005, 0.009), 'Monitor_Text', rot=(0, 0, -0.23), bevel=0.012)
+    box('Right_Display_line.002', (0.05507, 0.86935, 1.776), (0.23, 0.005, 0.009), 'Monitor_Text', rot=(0, 0, -0.23), bevel=0.012)
+    box('Right_Display_line.003', (0.05507, 0.86935, 1.729), (0.34, 0.005, 0.009), 'Monitor_Text', rot=(0, 0, -0.23), bevel=0.012)
+    box('Right_Display_line.004', (0.05507, 0.86935, 1.682), (0.285, 0.005, 0.009), 'Monitor_Text', rot=(0, 0, -0.23), bevel=0.012)
+    box('Right_Display_line.005', (0.05507, 0.86935, 1.635), (0.23, 0.005, 0.009), 'Monitor_Text', rot=(0, 0, -0.23), bevel=0.012)
+    box('Right_Monitor_base', (0.15, 0.88, 1.28), (0.3, 0.24, 0.045), 'Charcoal', rot=(0, 0, -0.23), bevel=0.012)
+    box('Right_Monitor_frame', (0.15, 0.88, 1.75), (0.73, 0.065, 0.49), 'Charcoal', rot=(0, 0, -0.23), bevel=0.012)
+    box('Right_Monitor_stem', (0.15798, 0.91408, 1.47), (0.055, 0.065, 0.35), 'Charcoal', rot=(0, 0, -0.23), bevel=0.012)
+    box('Right_Power_indicator', (0.42567, 0.78518, 1.525), (0.014, 0.008, 0.005), 'Monitor_Text', rot=(0, 0, -0.23), bevel=0.012)

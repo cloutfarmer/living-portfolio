@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alex Sigua · The Living Portfolio</title>
+    <meta name="description" content="Alex Sigua, software engineer in New Jersey. Look around a desk lit by real sun and weather, then open the site on the monitor." />
+    <!-- The same flame as the personal site's icon. -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Cpath d=%27M7.5.5c3 2.2 6.5 5.4 6.5 9.2A6 6 0 0 1 8 15.5a6 6 0 0 1-6-5.8c0-2.2 1-3.9 2.6-5.3-.1 1.6.4 2.9 1.5 3.6C5.6 5.4 6 3 7.5.5z%27 fill=%27%23d98a2b%27/%3E%3Cpath d=%27M8.4 7.6c1.3 1.2 2.5 2.6 2.5 4.4a2.9 2.9 0 0 1-5.8 0c0-1.2.6-2 1.4-2.7 0 .7.3 1.2.8 1.4-.2-1.2.3-2.2 1.1-3.1z%27 fill=%27%23f7d77e%27/%3E%3C/svg%3E" />
+    <!-- Link previews (LinkedIn, iMessage, Slack). Crawlers need absolute URLs. -->
+    <link rel="canonical" href="https://alexsigua.com/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://alexsigua.com/" />
+    <meta property="og:title" content="Alex Sigua · The Living Portfolio" />
+    <meta property="og:description" content="A room you can look around: software, jiu-jitsu, and live weather from central NJ." />
+    <meta property="og:image" content="https://alexsigua.com/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="An isometric bedroom desk at night: a person codes at two monitors by candlelight." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#08060f" />
+    <link rel="preload" href="/src/assets/fonts/alegreya-roman.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/src/assets/fonts/alegreya-italic.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- Dark from the first paint, before the stylesheet arrives (in development it comes with the script). The plain
+         intro waits for its styles; styles.css shows it, and in production that stylesheet blocks the first paint. -->
+    <style>html{background:#0b0717}#intro-static{visibility:hidden}</style>
+  </head>
+  <body>
+    <!-- The loader's name, unlit title, and skip link in plain HTML, so visitors see whose site this is before the
+         3D bundle downloads, and can leave without JavaScript. Intro.tsx removes this and puts its own copies in the
+         same place. Keep the two in step. -->
+    <div id="intro-static" class="intro">
+      <div class="intro-words"><div class="intro-centre"><div class="intro-title" aria-hidden="true"><span class="intro-name">Alex Sigua</span><span class="intro-work">The Living Portfolio</span></div></div></div>
+      <span class="site-link panel-cast intro-site"><a class="panel site-link-button" href="/projects/index.html?from=room">Skip to portfolio <span aria-hidden="true">→</span></a></span>
+    </div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

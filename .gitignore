@@ -1,0 +1,7 @@
+.DS_Store
+__pycache__/
+.playwright-mcp/
+
+# Generated independent dashboard build, served by the room in dev and production.
+/assets/processed/projects/
+/assets/processed/dashboard-build.json
