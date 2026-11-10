@@ -60,7 +60,9 @@ stated.
   of the menu, Credits or the monitor nameplate. "See my projects" opens the Computer view with the live site;
   "Leave computer" focuses "Desk", and back in the room the nameplate is gone. Reduced motion stops the nameplate's
   glow. The loader's "Skip to portfolio" lands on the Computer view with the live site, 0 page errors. At 1024x768
-  the placard covers most of the pinboard.
+  the placard covers most of the pinboard. On phones the placard is compact, its button and links on one row, and the room drops
+  into the spare height below it. Playwright WebKit at 375x548, 390x664 and 430x739 shows the monitor nameplate clear of
+  the placard; at 320x568 the placard fits the width.
 - **Accessibility:** one live region announces each view, and leaving the computer or phone returns focus to "Desk".
 - **CSP:** the production build, served with the exact header from `infra/site.yml`, logs 0 page errors, 0 console
   errors and 0 CSP violations through Room, Desk, Projects, Fitness, Pinboard, "Skip to portfolio" and "Back to the
@@ -75,6 +77,9 @@ stated.
   representative.
 - Real mouse and trackpad feel, a real screen reader, real phones and touch devices, and keyboard-only use of the
   pop-out links.
+- The phone's lock screen on a real iPhone. It's now a flat page laid over the glass, not a CSS 3D transform, which
+  the 1° lens broke in WebKit. Playwright WebKit with iPhone 13 emulation and Chromium at 390x844 and 1440x900 show it
+  on the glass, with the notifications opening Instagram.
 - How the window, loader and pinboard animation feel over a long visit.
 - Poly Pizza license pages block automated reads. Licenses are recorded as copied from those pages, and the source
   URLs of the trophy, bonsai and book props are inferred from file names.

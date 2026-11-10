@@ -419,7 +419,9 @@ body,
   }
 }
 
-/* Phones: the shortest label, under the menu, which wraps to a second row rather than run off the screen. */
+/* Phones: a small label in the top-left corner, just under the menu, which wraps to a second row rather than run off
+   the screen. Small, so the room keeps the screen; short, so the monitor's nameplate stays clear of it even in Safari's
+   664 px tall window on an iPhone. The button and links share one row. */
 @media (max-width: 767px) {
   .views {
     right: 1rem;
@@ -427,11 +429,11 @@ body,
   }
 
   .placard {
-    top: 6.25rem;
+    top: 4.25rem;
     left: 1rem;
-    right: 1rem;
-    max-width: none;
-    font-size: 0.85rem;
+    max-width: min(19rem, calc(100vw - 2rem));
+    font-size: 0.75rem;
+    line-height: 1.35;
   }
 
   /* Shorter, so the monitor's nameplate below stays clear of it. */
@@ -449,13 +451,20 @@ body,
   }
 
   .placard-action {
-    margin-top: 0.55rem;
-    padding: 0.4rem 0.9rem 0.5rem;
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.3rem 0.7rem 0.4rem;
+    font-size: 0.8rem;
+    vertical-align: middle;
   }
 
   .placard-contact {
-    margin-top: 0.45rem;
-    padding-top: 0.3rem;
+    display: inline-flex;
+    gap: 0.6rem;
+    margin: 0.5rem 0 0 0.7rem;
+    padding: 0;
+    border: 0;
+    vertical-align: middle;
   }
 }
 

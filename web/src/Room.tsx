@@ -23,7 +23,7 @@ import { Nameplate, NAMEPLATES } from './components/Nameplate'
 import { REACTIVE, Reactions } from './Reactions'
 import { Stink } from './Stink'
 import { loadState } from './loading'
-import { BOARD_FACE, boardPose, PhotoWall } from './PhotoWall'
+import { BOARD_CLIP, BOARD_FACE, boardPose, PhotoWall } from './PhotoWall'
 import { Monitor, SEATED_DISTANCE, surface } from './components/Monitor'
 import { Phone, phoneSurface } from './components/Phone'
 import { CANDLE_IN_SUN, Outdoors, useSky } from './Outdoors'
@@ -33,7 +33,8 @@ export type View = 'ROOM' | 'DESK' | 'COMPUTER' | 'PHONE'
 const MODEL_URL = '/corner-desk.glb'
 // Fill the window's width. Wide windows may crop empty floor and wall height, down to this
 // share of the room's height; shiftUp moves that crop toward the floor, which is mostly empty.
-const ROOM_FRAME = { minVisibleHeight: 0.8, shiftUp: 0.05 }
+// Tall windows have height to spare: the room drops by this share of it, clearing the placard under the menu.
+const ROOM_FRAME = { minVisibleHeight: 0.8, shiftUp: 0.05, tallDrop: 0.3 }
 // Angled bird's-eye: polar is radians down from straight overhead, scale is world units on screen.
 const DESK_CAMERA = { polar: 0.62, scale: 2.35, distance: 10 }
 // Clicking anywhere on or around the desk enters the desk view.
@@ -305,13 +306,14 @@ export function Room({
     })
     const middle = seen.getCenter(new Vector3())
     const extent = seen.getSize(new Vector3())
-    middle.y += extent.y * ROOM_FRAME.shiftUp
-    const position = new Vector3(middle.x, middle.y, 0).applyMatrix4(authored.matrixWorld)
-    const target = middle.clone().applyMatrix4(authored.matrixWorld)
     const zoom = Math.min(
       size.width / extent.x,
       size.height / (extent.y * ROOM_FRAME.minVisibleHeight),
     )
+    const spare = size.height > size.width ? Math.max(0, size.height / zoom - extent.y) : 0
+    middle.y += extent.y * ROOM_FRAME.shiftUp + spare * ROOM_FRAME.tallDrop
+    const position = new Vector3(middle.x, middle.y, 0).applyMatrix4(authored.matrixWorld)
+    const target = middle.clone().applyMatrix4(authored.matrixWorld)
     const room: Pose = { position, target, zoom }
 
     const theta = new Spherical().setFromVector3(position.clone().sub(target)).theta
@@ -375,7 +377,7 @@ export function Room({
   const shot = useMemo(() => {
     if (!shots) return null
     if (closing) return shots.COMPUTER
-    return board ? shotFrom(boardPose(size), size.height) : shots[view]
+    return board ? { ...shotFrom(boardPose(size), size.height), clip: BOARD_CLIP } : shots[view]
   }, [shots, view, board, closing, size])
   const leanShot = useMemo(() => {
     return shots && lean ? shots[lean] : null

@@ -1,7 +1,7 @@
 import { Html } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Box3, type Group, type Mesh, type Object3D, Quaternion, Vector3 } from 'three'
+import { Box3, type Group, MathUtils, type Mesh, type Object3D, type PerspectiveCamera, Quaternion, Vector3 } from 'three'
 import { REDUCED_MOTION, TAP_SLOP } from '../Life'
 import { skyTime } from '../weather'
 
@@ -24,7 +24,7 @@ const NOTICES: Notice[] = [
   { ...RONDO, action: 'posted a reel: Goals from the weekend' },
 ]
 
-// The page's own pixels across the glass. At the shot's framing they land about 1:1 on a 900 px tall window.
+// The page's own pixels across the glass, before it's scaled to fit the glass on screen.
 const CSS_WIDTH = 360
 // It's only about 45 px tall from the desk, so the click target is wider than the glass.
 const REACH = 1.3
@@ -193,6 +193,9 @@ export function Phone({
     return found
   }, [scene])
   const screen = useRef<Group>(null)
+  const fit = useRef<HTMLDivElement>(null)
+  const camera = useThree((state) => state.camera) as PerspectiveCamera
+  const view = useThree((state) => state.size)
   const buzzStart = useRef<number | null>(null)
   const elapsed = useRef(0)
 
@@ -207,6 +210,12 @@ export function Phone({
 
   useFrame(({ clock }) => {
     elapsed.current = clock.elapsedTime
+    // The camera is still closing in as the screen wakes, so the lock screen is sized to the glass every frame.
+    // Centring and scaling are one transform, so the page takes taps only where it's drawn, never over the menu.
+    if (fit.current) {
+      const across = 2 * camera.position.distanceTo(glass.position) * Math.tan(MathUtils.degToRad(camera.fov) / 2)
+      fit.current.style.transform = `translate(-50%, -50%) scale(${(glass.width * view.height) / across / CSS_WIDTH})`
+    }
     if (buzzStart.current === null) return
     const age = clock.elapsedTime - buzzStart.current
     const done = age >= BUZZ.length
@@ -240,8 +249,13 @@ export function Phone({
       )}
       {awake && notices && (
         <group ref={screen}>
-          <Html transform position={glass.position} quaternion={glass.quaternion} distanceFactor={1} scale={(glass.width * 400) / CSS_WIDTH}>
-            <LockScreen notices={notices} height={(CSS_WIDTH * glass.height) / glass.width} onNotice={handleNotice} />
+          {/* Flat on the screen, not a CSS 3D object: the 1° lens makes drei's CSS perspective so deep that iOS Safari
+              misplaces a transformed page. The camera looks straight down at the upright phone and can't turn here,
+              so a flat page laid over the glass looks the same. */}
+          <Html position={glass.position}>
+            <div ref={fit} style={{ width: CSS_WIDTH, transform: 'translate(-50%, -50%) scale(0)' }}>
+              <LockScreen notices={notices} height={(CSS_WIDTH * glass.height) / glass.width} onNotice={handleNotice} />
+            </div>
           </Html>
         </group>
       )}

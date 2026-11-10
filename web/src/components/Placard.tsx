@@ -6,7 +6,7 @@ const COPY = {
   work: 'The Living Portfolio',
   year: '2026',
   materials: 'Blender, WebGL, one candle, live weather from central NJ',
-  blurb: 'Alex Sigua is a software engineer, open to full-time roles and freelance projects. His projects run live on the computer at the desk.',
+  blurb: "I'm a software engineer, open to full-time roles and freelance projects. My projects run live on the computer at the desk.",
   action: 'See my projects',
 }
 
