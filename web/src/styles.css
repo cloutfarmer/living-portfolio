@@ -388,7 +388,7 @@ body,
   text-shadow: var(--over-scene);
 }
 
-/* Phones: the shortest label, clear of Credits and the hint.
+/* Phones: a small label in the top-left corner, under the menu, so the room keeps the screen.
    The menu wraps to a second row rather than run off the screen. */
 @media (max-width: 767px) {
   .views {
@@ -397,15 +397,25 @@ body,
   }
 
   .placard {
-    bottom: 3.6rem;
+    top: 7.6rem;
+    bottom: auto;
     left: 1rem;
-    right: 1rem;
-    max-width: none;
-    font-size: 0.85rem;
+    max-width: 15rem;
+    font-size: 0.75rem;
+    line-height: 1.35;
   }
 
+  .placard-panel {
+    padding: 0.5rem 0.8rem 0.6rem;
+  }
+
+  .placard-work,
   .placard-materials {
     display: none;
+  }
+
+  .placard-blurb {
+    margin-top: 0.35rem;
   }
 }
 
@@ -1132,12 +1142,6 @@ body,
   }
 }
 
-/* Phones with the taller Credits target: the placard sits clear above it. */
-@media (pointer: coarse) and (max-width: 767px) {
-  .placard {
-    bottom: 4.5rem;
-  }
-}
 @media(max-width:767px){.intro-site{left:6%;right:auto}}
 .sr-only{position:fixed;top:0;left:0;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 @media(max-width:767px){iframe[title="Projects dashboard"]{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important}}

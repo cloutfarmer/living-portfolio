@@ -6,7 +6,7 @@ const COPY = {
   work: 'The Living Portfolio',
   year: '2026',
   materials: 'Blender, WebGL, one candle, live weather from central NJ',
-  blurb: 'Alex Sigua is a software engineer, open to full-time roles and freelance projects. Look around: the sun and rain in the window are real, right now.',
+  blurb: "I'm a software engineer, open to full-time roles and freelance projects. Look around: the sun and rain in the window are real, right now.",
 }
 
 // A museum wall label for the room, in a brass-framed panel like the desk bubbles. The words let the pointer through
