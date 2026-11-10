@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react'
+import type { CSSProperties, MouseEvent } from 'react'
 
 // Pops out of the room into the full portfolio site, in the same tab. The site reads
 // `from=room` and shows a "Back to the room" button. A real link, so Cmd-click and
@@ -8,18 +8,27 @@ export const SITE_URL = `${import.meta.env.BASE_URL}projects/index.html?from=roo
 // `expand` is for the computer view, where the site is already on screen: there it reads as
 // making that page full screen rather than going somewhere new. Everywhere else it reads "Skip to portfolio",
 // the same as the plain-HTML copy in index.html that shows before the script runs.
+// `onOpen` takes a plain click instead of following the link (the loader opens the computer view with it); Cmd-click,
+// Ctrl-click and middle-click still open the full site in a new tab.
 export function SiteLink({
   className = '',
   expand = false,
   style,
+  onOpen,
 }: {
   className?: string
   expand?: boolean
   style?: CSSProperties
+  onOpen?: () => void
 }) {
+  const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (!onOpen || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+    event.preventDefault()
+    onOpen()
+  }
   return (
     <span className={`site-link panel-cast ${className}`} style={style}>
-      <a className="panel site-link-button" href={SITE_URL} aria-label={expand ? 'Open the website full screen' : undefined}>
+      <a className="panel site-link-button" href={SITE_URL} onClick={handleClick} aria-label={expand ? 'Open the website full screen' : undefined}>
         {expand ? (
           <>
             <span className="site-link-icon" aria-hidden="true">⤢</span> Full screen
