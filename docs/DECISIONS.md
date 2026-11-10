@@ -25,7 +25,18 @@ Choices that still apply, and why. "I" is the owner, Alex. Remove an entry when 
   for bloom, vignette and AgX. Camera springs in `CameraRig.tsx` replace GSAP. The clock is built in the browser.
 - **Hosting: AWS at `alexsigua.com`,** my choice for low cost and to show AWS skills: S3 behind CloudFront
   with Origin Access Control, ACM and Route 53, as CloudFormation in `infra/site.yml`. `.com` over `.io` (about 5x
-  the price). A GitHub Actions deploy through an OIDC role is a later step.
+  the price).
+- **Branches: `work/<topic>-YYYYMMDD` → `main` → `prod`, in both repositories, and only `prod` deploys,** the same
+  flow as my other projects. Changes are made in a separate worktree and land on `main`; a commit that passed CI is
+  promoted by fast-forward, so `prod` is always an exact `main` commit and merging to `main` never ships by itself.
+- **GitHub Actions deploys content through OIDC; infrastructure stays manual.** No AWS keys are stored: GitHub's
+  short-lived token is exchanged for a role that trusts only this repository's `production` environment (which admits
+  only `prod`) and can only do what `deploy.mjs` does. Stack changes stay a reviewed change set, because a role able to
+  change IAM, DNS or the distribution would be far more dangerous to leak than one that uploads files.
+- **The private site is read through a GitHub App, not a deploy key or personal token.** Its installation tokens last
+  an hour at most, are requested for one repository and one permission at a time, and belong to no person's account.
+  The private site's push starts the deploy here with `workflow_dispatch` on `prod`, because `repository_dispatch`
+  always runs on the default branch, which the environment rule and the role's trust would refuse.
 
 ## Look
 

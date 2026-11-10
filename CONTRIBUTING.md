@@ -15,16 +15,18 @@ npx vite        # the room; the personal site on the monitor is a separate, priv
 
 ## Branches and landing
 
-`main` is the released line. Work on a branch and open a pull request into `main`:
+Changes go `work/<topic>-YYYYMMDD` → `main` → `prod`, and only `prod` deploys ([deploy](docs/DEPLOY.md)).
+`main` is the integration branch. Make each change on a `work/` branch in its own worktree, because other sessions
+may share the main checkout, and open a pull request into `main`:
 
 ```bash
-git switch main
-git pull --ff-only
-git switch -c your-change
+git fetch origin
+git worktree add ../living-portfolio-your-change -b work/your-change-YYYYMMDD origin/main
 ```
 
 Land changes by fast-forward from a local checkout (`git merge --ff-only`, then push), not with GitHub's merge
-button. A merge commit made on GitHub can carry the account's private email.
+button. A merge commit made on GitHub can carry the account's private email. To release, promote a `main` commit
+that passed CI with `git push origin main:prod`. That push deploys.
 
 ## Keep it public-safe
 
@@ -52,7 +54,7 @@ node .agent/repository-scan.mjs      # secrets and env files
 git diff --check
 ```
 
-CI runs all three on every pull request and on `main`.
+CI runs all three on every pull request and on `main` and `prod`.
 
 ## Verification
 

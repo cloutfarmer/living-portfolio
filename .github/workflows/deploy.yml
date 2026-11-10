@@ -1,0 +1,129 @@
+name: deploy
+
+# Owned by this project. Builds the room from this repository's prod and the personal site from portfolio-dashboard's
+# prod, uploads both, then checks the live site. Content only: infra/site.yml stays a manual, reviewed step.
+# Procedure, setup and manual fallback: docs/DEPLOY.md.
+#
+# A push to prod runs it, and so does portfolio-dashboard's trigger-deploy workflow (workflow_dispatch with ref=prod).
+# The production environment admits only prod, and the AWS role trusts only that environment, so a run from any other
+# branch is refused before it gets credentials. Never add pull_request or pull_request_target here.
+
+on:
+  push:
+    branches: [prod]
+  workflow_dispatch:
+
+permissions: {}
+
+# One deploy at a time, and a running one is never cancelled halfway through an upload.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment:
+      name: production
+      url: https://alexsigua.com
+    permissions:
+      id-token: write # OIDC token for the AWS role
+      contents: read
+    steps:
+      # Both repositories sit side by side in the workspace, where prepare-dashboard.mjs looks for the site.
+      # Pinned by commit, so a moved tag can't change what runs. v7.0.1.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          path: living-portfolio
+          fetch-depth: 0 # the public-safety check reads every commit's author and committer
+          persist-credentials: false
+
+      # A short-lived token that can only read portfolio-dashboard. v3.3.0.
+      - id: dashboard-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510
+        with:
+          client-id: ${{ vars.DEPLOY_APP_CLIENT_ID }}
+          private-key: ${{ secrets.DEPLOY_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: portfolio-dashboard
+          permission-contents: read
+
+      # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ github.repository_owner }}/portfolio-dashboard
+          ref: prod
+          path: portfolio-dashboard
+          token: ${{ steps.dashboard-token.outputs.token }}
+          persist-credentials: false
+
+      # v7.1.0. Node 22.18+: check-public.mjs needs zlib's zstd, check-sky.mjs runs .ts imports.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 22.18
+          cache: npm
+          cache-dependency-path: |
+            living-portfolio/web/package-lock.json
+            portfolio-dashboard/package-lock.json
+
+      # The same checks as ci.yml, so nothing ships that CI would fail.
+      - name: Diff check
+        working-directory: living-portfolio
+        run: git diff --check
+      - name: Repository scan
+        working-directory: living-portfolio
+        run: node .agent/repository-scan.mjs
+      - name: Public-safety check
+        working-directory: living-portfolio
+        run: node scripts/check-public.mjs
+      - name: Install
+        working-directory: living-portfolio/web
+        run: npm ci
+      - name: Build
+        working-directory: living-portfolio/web
+        run: npm run build
+      - name: Sky and weather checks
+        working-directory: living-portfolio/web
+        run: npm test
+      # The site's own CI checks. deploy.mjs builds it.
+      - name: Install the personal site
+        working-directory: portfolio-dashboard
+        run: npm ci
+      - name: Test the personal site
+        working-directory: portfolio-dashboard
+        run: npm test
+
+      # v6.3.0. The role ARN is a secret, so it and its account ID are masked.
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+          mask-aws-account-id: true
+
+      # Mask the account, bucket and distribution before any step can print them.
+      - name: Mask AWS identifiers
+        run: |
+          set -euo pipefail
+          output() {
+            aws cloudformation describe-stacks --region us-east-1 --stack-name living-portfolio-site \
+              --query "Stacks[0].Outputs[?OutputKey=='$1'].OutputValue" --output text
+          }
+          account="$(aws sts get-caller-identity --query Account --output text)"
+          bucket="$(output BucketName)"
+          distribution="$(output DistributionId)"
+          for value in "$account" "$bucket" "$distribution"; do
+            if [[ -z "$value" || "$value" == None ]]; then
+              echo "deploy: could not read an identifier to mask; stopping before anything prints it." >&2
+              exit 1
+            fi
+            echo "::add-mask::$value"
+          done
+
+      - name: Deploy
+        working-directory: living-portfolio
+        run: node web/scripts/deploy.mjs
+
+      - name: Check the live site
+        working-directory: living-portfolio
+        run: web/scripts/check-live.sh web/dist/index.html
