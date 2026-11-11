@@ -21,7 +21,7 @@ npm ci
 npx vite               # the room only; serves http://localhost:5173 or the next free port
 ```
 
-Without the personal site checked out, the room works, but the main monitor and the "Skip to portfolio" links load
+Without the personal site checked out, the room works, but the main monitor and the "⤢ Full screen" link load
 the room itself (Vite's fallback page) instead of the site.
 With `../portfolio-dashboard` present (or `DASHBOARD_DIR` set), use the full commands:
 

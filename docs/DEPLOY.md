@@ -136,7 +136,7 @@ When Actions is unavailable, deploy from a laptop with the stack's administrator
   `content-type: model/gltf-binary`.
 - Given the built `index.html`, the live home page matches it within about 2 minutes.
 
-By hand, in a browser: the room loads, the computer shows the site, and "Skip to portfolio" and
+By hand, in a browser: the room loads, the computer shows the site, and "⤢ Full screen" and
 "Back to the room" work. There are no console errors.
 
 ## Rollback

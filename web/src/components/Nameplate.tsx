@@ -1,9 +1,12 @@
 import { Html } from '@react-three/drei'
 
+// Every label that leads to the computer says this: the desk's, the monitor's, and the desk bubble in Room.tsx.
+export const PROJECTS = { label: 'Projects', blurb: 'live on this screen' } as const
+
 // Edit the nameplates' words here. Only things that change the view when clicked get one.
 export const NAMEPLATES = {
-  DESK: { label: 'Desk', blurb: 'projects on the computer' },
-  COMPUTER: { label: 'Projects', blurb: 'live on this screen' },
+  DESK: PROJECTS,
+  COMPUTER: PROJECTS,
   BOARD: { label: 'Pinboard', blurb: 'open the photos' },
 }
 

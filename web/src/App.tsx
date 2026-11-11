@@ -230,7 +230,7 @@ export function App() {
       </details>
       {/* The key restarts its fade on each view change, which is how reduced motion changes views. */}
       <div key={`${view}:${board}`} className="curtain" aria-hidden="true" />
-      {!introGone && <Intro onEnter={handleEnter} onDone={handleIntroDone} onSkip={handleProjects} />}
+      {!introGone && <Intro onEnter={handleEnter} onDone={handleIntroDone} />}
     </LoadBoundary>
   )
 }

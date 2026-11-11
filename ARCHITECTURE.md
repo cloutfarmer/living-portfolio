@@ -82,9 +82,9 @@ the site posts a versioned `portfolio:exit` message, checked against the same or
 full-window surface. Leaving fades the iframe out while the camera holds (DOM draws over the scene), then the camera
 reverses. The window switcher (`AltTab.tsx`) is parked, unmounted, for a future easter egg.
 
-`components/SiteLink.tsx` pops out to `/projects/index.html?from=room` in the same tab, from the loader, the view menu
-and the computer. `web/index.html` holds the loader's name, unlit title and link in plain HTML, so they show at first
-paint and work without JavaScript; `Intro.tsx` swaps them for its own in place, keeping focus. The site reads
+`components/SiteLink.tsx` pops out to `/projects/index.html?from=room` in the same tab, from the computer and the
+load-error screen. `web/index.html` holds the loader's name and unlit title in plain HTML, so they show at first paint,
+plus a `<noscript>` link to the site; `Intro.tsx` swaps the plain copy for its own in place. The site reads
 `from=room`, skips its intro and links "Back to the room" to `../`. The monitor's sticky note (a canvas texture in
 `Monitor.tsx`) says the screen is live; screen readers get a hidden status line.
 
