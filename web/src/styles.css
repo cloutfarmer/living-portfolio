@@ -1105,20 +1105,11 @@ body,
 }
 /* Narrow windows have no room beside the view buttons. */
 @media(max-width:767px){.leave-phone{top:auto;right:auto;bottom:20px;left:20px}}
-/* On phones the site fills the window, and its own header is at the top, so the two buttons sit at the bottom. */
-/* The strip between them lets taps through to the site underneath. */
+/* On phones the site already fills the window, so Full screen would do nothing: the site shows its own
+   "Back to the room" instead (Monitor's `exit=1`), and Escape still leaves. */
 @media (max-width: 767px) {
   .leave-computer {
-    top: auto;
-    right: 16px;
-    bottom: 16px;
-    left: 16px;
-    justify-content: space-between;
-    pointer-events: none;
-  }
-
-  .leave-computer > * {
-    pointer-events: auto;
+    display: none;
   }
 }
 

@@ -191,13 +191,15 @@ export function Monitor({
         </div>
       </Html>}
     {/* Otherwise it's offset by wherever the world's origin lands on screen. */}
-    {active && mobile && <Html fullscreen zIndexRange={[1000, 1000]} calculatePosition={() => [0, 0]}><div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100dvh' }}><ComputerFrame shown={shown} onLoad={handleLoad} /></div></Html>}
+    {active && mobile && <Html fullscreen zIndexRange={[1000, 1000]} calculatePosition={() => [0, 0]}><div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100dvh' }}><ComputerFrame shown={shown} onLoad={handleLoad} phone /></div></Html>}
   </>
 }
 
 export const SEATED_DISTANCE = 0.64
 
 // Transparent until loaded, then fades in over the matching picture; fades out again on leaving.
-function ComputerFrame({ shown, onLoad }: { shown: boolean; onLoad: () => void }) {
-  return <iframe className={shown ? 'screen-live screen-live-shown' : 'screen-live'} title="Projects dashboard" src="/projects/index.html?embedded=1" onLoad={onLoad} style={{ display: 'block', width: '100%', height: '100%', border: 0, background: '#0b0d10' }} />
+// On phones the room hides its own controls over the site, so `exit=1` asks the site for its "Back to the room" button,
+// which posts portfolio:exit like Escape does.
+function ComputerFrame({ shown, onLoad, phone = false }: { shown: boolean; onLoad: () => void; phone?: boolean }) {
+  return <iframe className={shown ? 'screen-live screen-live-shown' : 'screen-live'} title="Projects dashboard" src={phone ? '/projects/index.html?embedded=1&exit=1' : '/projects/index.html?embedded=1'} onLoad={onLoad} style={{ display: 'block', width: '100%', height: '100%', border: 0, background: '#0b0d10' }} />
 }
