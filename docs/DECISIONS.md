@@ -9,8 +9,9 @@ Choices that still apply, and why. "I" is the owner, Alex. Remove an entry when 
   the room are allowed. Lifted for the two desk bubbles (`software` → the site on the main monitor, `fitness` → the
   phone) and the website pop-out, "⤢ Full screen" beside "Leave computer", which goes in the same tab to
   `/projects/index.html?from=room` and shows "Back to the room". The loader's "Skip to portfolio →" opens the Computer
-  view instead, so visitors see the site in the room and can pop out from there. On phones (under 768 px) it goes to
-  the full site, since there the Computer view is that site full screen with the room's buttons over it; Cmd-click, the plain-HTML copy before
+  view instead, so visitors see the site in the room and can pop out from there. On phones (under 768 px) the
+  Computer view is already the site full screen, so it has no Full screen or Leave computer; the site shows its own
+  amber "Back to the room", which returns to the desk without reloading the room. Cmd-click, the plain-HTML copy before
   the script runs, and the load-error screen still go to the full site. The view menu's copy was dropped for the
   placard's "See my projects".
 - **The screen's interactivity is spelled out** on the monitor's sticky note only; a matching bottom hint was dropped

@@ -28,6 +28,8 @@ const ANNOUNCE: Record<View | 'BOARD', string> = {
   PHONE: 'Phone view: two Instagram notifications.',
   BOARD: 'Pinboard view: the photos are spread out.',
 }
+// Phones (Monitor's breakpoint) have no Full screen: the site fills the window and has its own way back.
+const ANNOUNCE_PHONE_COMPUTER = 'The website fills the screen. Choose Back to the room to leave.'
 
 export function App() {
   const [view, setView] = useState<View>('ROOM')
@@ -156,7 +158,7 @@ export function App() {
         </button>
       </nav>
       <p className="sr-only" role="status">
-        {entered ? ANNOUNCE[board ? 'BOARD' : view] : ''}
+        {entered ? (view === 'COMPUTER' && !board && window.innerWidth < 768 ? ANNOUNCE_PHONE_COMPUTER : ANNOUNCE[board ? 'BOARD' : view]) : ''}
       </p>
       {/* Required by the models' CC-BY licenses. See assets/ASSET_MANIFEST.csv. */}
       <details className={`credits${entered ? ' controls-in' : ''}`} inert={!entered}>

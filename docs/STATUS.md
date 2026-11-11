@@ -16,7 +16,7 @@ entries.
   - Seasonal skis or surfboard.
   - Candle and blinds reactions.
   - A window with the real sun and moon and live National Weather Service weather.
-  - Credits, a title-fill loader whose "Skip to portfolio" opens the Computer view (the full site on phones), a "⤢ Full screen" pop-out, and a
+  - Credits, a title-fill loader whose "Skip to portfolio" opens the Computer view, a "⤢ Full screen" pop-out (not on phones, where the site has its own "Back to the room"), and a
     museum placard under the view menu with a "See my projects" button and contact links.
   - Until the visitor first reaches the desk, a glowing "Projects" nameplate over the main monitor points at the
     computer.
