@@ -1,17 +1,18 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "modules": [
     "core",
     "review",
     "triage"
   ],
   "files": {
+    ".agent/freshness.mjs": "7c3571a5a08ba66d4a5fb78e5836f3af4dbd91085aefc5daa7f463473c53e72a",
     ".agent/repository-scan.mjs": "5453f42c78cb0c72e8e08fe2e29fe27939525677813aa0a63c7dd9c2b7adbad8",
     ".claude/skills/ponytail-review/LICENSE": "fb1bc6909ac3ef82d5c22106e32ef682b0cff66788fa915fb9b53b15c9d2f3ab",
     ".claude/skills/ponytail-review/SKILL.md": "33fe4ebe22a460924e5d4a261e223df22e409cc94ab76182bee9fb91a3ef022e",
     ".claude/skills/ponytail-review/SOURCE": "688968fa240487607236d7529cdbe9914ebeb3c63eee4d66a4f82d82dec6b17f",
     ".claude/skills/pr-triage/SKILL.md": "27205867cea22af013ad3d521f593b707a30a78bc5acb1c652300322de9fcc42",
-    ".github/workflows/agent-brief.yml": "b86dcf2bc5489056a0121110b9935cecea68b522239ee7bbabff3b6e33c56c37",
+    ".github/workflows/agent-brief.yml": "f1d5c43b379409dd33525c905ea83107f32a662c181d1cb053633efcc20db383",
     ".github/workflows/agent-tripwire.yml": "330a2f625578281b91a1ddb2c5c5a783beb117b59122a5463ad171d709bd970e",
     ".github/workflows/kit-check.yml": "64ffe1cd2f008f8d27dc56bb91db57183d65581b3cbef422a7d6ae7559a37437"
   }
