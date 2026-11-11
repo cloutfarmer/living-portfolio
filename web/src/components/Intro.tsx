@@ -206,8 +206,9 @@ export function Intro({ onEnter, onDone, onSkip }: { onEnter: () => void; onDone
         </div>
       </div>
       {/* Visitors who came for the work land on the computer's screen as soon as the room opens; Full screen is one
-          click from there. The click also skips the loader's holds, like any click. */}
-      <SiteLink className="intro-site" style={rise(0.3)} onOpen={onSkip} />
+          click from there. The click also skips the loader's holds, like any click. On phones (Monitor's breakpoint)
+          the computer view is already the site full screen under the room's buttons, so the link goes to the site. */}
+      <SiteLink className="intro-site" style={rise(0.3)} onOpen={window.innerWidth < 768 ? undefined : onSkip} />
     </div>
   )
 }
