@@ -19,7 +19,7 @@ import {
 import { CameraRig, DIORAMA_FOV, SEATED_FOV, type Shot } from './CameraRig'
 import { Life, REDUCED_MOTION, TAP_SLOP } from './Life'
 import { LoadBoundary } from './components/LoadBoundary'
-import { Nameplate, NAMEPLATES } from './components/Nameplate'
+import { Nameplate, NAMEPLATES, PROJECTS } from './components/Nameplate'
 import { REACTIVE, Reactions } from './Reactions'
 import { Stink } from './Stink'
 import { loadState } from './loading'
@@ -41,7 +41,7 @@ const DESK_CAMERA = { polar: 0.62, scale: 2.35, distance: 10 }
 const DESK_PARTS = /^(Desk_|Main_Monitor|Right_Monitor|Shake_)/
 // Edit the bubbles' words here. They're the person's thoughts, so they speak as the person.
 const BUBBLES = [
-  { object: 'Main_Display', label: 'software', blurb: "Projects I've built, live on this screen.", goesTo: 'COMPUTER', nudge: '20%' },
+  { object: 'Main_Display', ...PROJECTS, goesTo: 'COMPUTER', nudge: '20%' },
   { object: 'Shake_lid', label: 'fitness', blurb: 'My training page and my soccer club, on Instagram.', goesTo: 'PHONE', nudge: '-58%' },
 ] as const
 // The share of the window the phone fills, nearly overhead, close enough that nothing above it gets in the way.

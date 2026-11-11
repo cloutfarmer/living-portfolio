@@ -6,7 +6,7 @@ Choices that still apply, and why. "I" is the owner, Alex. Remove an entry when 
 ## Scope
 
 - **Routing is mostly deferred.** I chose not to route anything until the core is done; reactions that stay in
-  the room are allowed. Lifted for the two desk bubbles (`software` → the site on the main monitor, `fitness` → the
+  the room are allowed. Lifted for the two desk bubbles (`Projects` → the site on the main monitor, `fitness` → the
   phone) and the website pop-out, "⤢ Full screen" beside "Leave computer", which goes in the same tab to
   `/projects/index.html?from=room` and shows "Back to the room". The loader's "Skip to portfolio →" opens the Computer
   view instead, so visitors see the site in the room and can pop out from there. On phones (under 768 px) the
@@ -71,7 +71,8 @@ Choices that still apply, and why. "I" is the owner, Alex. Remove an entry when 
   candle and blinds, get the pointer cursor only. One exception shows without hover: "Projects · live on this screen"
   over the main monitor glows slowly in the Room view until the visitor first reaches the desk, computer or phone, so
   the goal is visible in the scene itself. It replaced the bottom "Click the desk" hint, which the placard and this
-  nameplate made redundant.
+  nameplate made redundant. The desk's nameplate and the desk bubble on the monitor use the same words, so everything
+  that leads to the computer says one thing.
 - **The candle blows out and the blinds tilt on a click** (`Reactions.tsx`). The candle relights after about 4.5 s;
   the blinds are one morph target, so no extra draw calls.
 - **The left-wall corner changes with the season:** skis and poles December to March, a fish surfboard otherwise, by the

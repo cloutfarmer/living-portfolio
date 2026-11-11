@@ -16,7 +16,7 @@ asymmetry, angled books, and imperfect piles. One seated placeholder character i
 
 ## Current direction
 
-- **The monitor dashboard and the desk bubbles are approved.** `software` goes to Projects, and `fitness` wakes the
+- **The monitor dashboard and the desk bubbles are approved.** `Projects` goes to the site, and `fitness` wakes the
   phone, which links out to Instagram. Other content panels remain deferred.
 - **The look is a 3D-era adventure game,** my choice: Syberia, The Longest Journey, Professor Layton. The
   room already fits; the interface around it should too, with storybook serif type, framed panels with square or
