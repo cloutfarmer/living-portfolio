@@ -34,15 +34,14 @@
     <style>html{background:#0b0717}#intro-static{visibility:hidden}</style>
   </head>
   <body>
-    <!-- The loader's name, unlit title, and skip link in plain HTML, so visitors see whose site this is before the
-         3D bundle downloads, and can leave without JavaScript. Intro.tsx removes this and puts its own copies in the
-         same place. Keep the two in step. -->
+    <!-- The loader's name and unlit title in plain HTML, so visitors see whose site this is before the 3D bundle
+         downloads. Intro.tsx removes this and puts its own copies in the same place. Keep the two in step. -->
     <div id="intro-static" class="intro">
       <div class="intro-words"><div class="intro-centre"><div class="intro-title" aria-hidden="true"><span class="intro-name">Alex Sigua · Software Engineer</span><span class="intro-work">The Living Portfolio</span></div></div></div>
       <p class="sr-only">Alex Sigua, software engineer.</p>
-      <span class="site-link panel-cast intro-site"><a class="panel site-link-button" href="/projects/index.html?from=room">Skip to portfolio <span aria-hidden="true">→</span></a></span>
-      <!-- Without JavaScript the room never loads, so the contact links from the placard (ContactLinks.tsx) show here. -->
-      <noscript><ul class="contact-links intro-contact" aria-label="Contact"><li><a href="https://github.com/cloutfarmer">GitHub</a></li><li><a href="https://www.linkedin.com/in/alexsigua">LinkedIn</a></li><li><a href="/projects/alex-sigua-resume.pdf">Résumé</a></li></ul></noscript>
+      <!-- Without JavaScript the room never loads, so a link to the full site and the placard's contact links
+           (ContactLinks.tsx) show here. -->
+      <noscript><span class="site-link panel-cast intro-site"><a class="panel site-link-button" href="/projects/index.html?from=room">See my projects <span aria-hidden="true">→</span></a></span><ul class="contact-links intro-contact" aria-label="Contact"><li><a href="https://github.com/cloutfarmer">GitHub</a></li><li><a href="https://www.linkedin.com/in/alexsigua">LinkedIn</a></li><li><a href="/projects/alex-sigua-resume.pdf">Résumé</a></li></ul></noscript>
     </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

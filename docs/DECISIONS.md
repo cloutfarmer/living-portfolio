@@ -8,12 +8,11 @@ Choices that still apply, and why. "I" is the owner, Alex. Remove an entry when 
 - **Routing is mostly deferred.** I chose not to route anything until the core is done; reactions that stay in
   the room are allowed. Lifted for the two desk bubbles (`Projects` → the site on the main monitor, `fitness` → the
   phone) and the website pop-out, "⤢ Full screen" beside "Leave computer", which goes in the same tab to
-  `/projects/index.html?from=room` and shows "Back to the room". The loader's "Skip to portfolio →" opens the Computer
-  view instead, so visitors see the site in the room and can pop out from there. On phones (under 768 px) the
-  Computer view is already the site full screen, so it has no Full screen or Leave computer; the site shows its own
-  amber "Back to the room", which returns to the desk without reloading the room. Cmd-click, the plain-HTML copy before
-  the script runs, and the load-error screen still go to the full site. The view menu's copy was dropped for the
-  placard's "See my projects".
+  `/projects/index.html?from=room` and shows "Back to the room". On phones (under 768 px) the Computer view is already
+  the site full screen, so it has no Full screen or Leave computer; the site shows its own amber "Back to the room",
+  which returns to the desk without reloading the room. The placard's "See my projects" is the way in. The loader has
+  no site link, since the room loads in a few seconds; the view menu's link was dropped too. Without JavaScript the
+  loader shows a link to the full site, and the load-error screen links there too.
 - **The screen's interactivity is spelled out** on the monitor's sticky note only; a matching bottom hint was dropped
   as a duplicate, so screen readers get a hidden status line instead.
 - **The person codes on the right monitor and the site lives on the main one,** as I laid it out: vim in a loop on

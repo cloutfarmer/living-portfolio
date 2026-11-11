@@ -1,7 +1,6 @@
 import { type CSSProperties, Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { REDUCED_MOTION } from '../Life'
 import { hasVisited, LOAD_STEPS, loadState, markVisited, WEATHER_WAIT_MS } from '../loading'
-import { SiteLink } from './SiteLink'
 
 const STALL_MS = 100
 const FILL_RATE = 6
@@ -20,7 +19,7 @@ let letterCount = 0
 const WORDS = TITLE.split(' ').map((word) => [...word].map((letter) => ({ letter, index: letterCount++ })))
 const TITLE_STYLE = { '--n': letterCount } as CSSProperties
 
-// index.html's plain copies of the name, title and skip link began their rise with the page, so these pick each
+// index.html's plain copies of the name and title began their rise with the page, so these pick each
 // animation up where it is (a negative delay) rather than starting over.
 function riseStart() {
   return document.getElementById('intro-static') ? performance.now() / 1000 : null
@@ -30,7 +29,7 @@ const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 
 
 // The name shows from the first paint, and light fills the title as the room loads. When it's full, the title
 // glows once and the room opens outward from it.
-export function Intro({ onEnter, onDone, onSkip }: { onEnter: () => void; onDone: () => void; onSkip: () => void }) {
+export function Intro({ onEnter, onDone }: { onEnter: () => void; onDone: () => void }) {
   const layer = useRef<HTMLDivElement>(null)
   const title = useRef<HTMLDivElement>(null)
   const meter = useRef<HTMLDivElement>(null)
@@ -41,13 +40,9 @@ export function Intro({ onEnter, onDone, onSkip }: { onEnter: () => void; onDone
   const rise = (delay: number): CSSProperties | undefined =>
     risen === null ? undefined : { animationDelay: `${delay - risen}s` }
 
-  // Swap index.html's plain link for this one before paint, keeping keyboard focus on it.
+  // Swap index.html's plain copy for this one before paint.
   useLayoutEffect(() => {
-    const placeholder = document.getElementById('intro-static')
-    if (!placeholder) return
-    const focused = placeholder.contains(document.activeElement)
-    placeholder.remove()
-    if (focused) layer.current?.querySelector<HTMLAnchorElement>('.intro-site a')?.focus()
+    document.getElementById('intro-static')?.remove()
   }, [])
 
   useEffect(() => {
@@ -205,9 +200,6 @@ export function Intro({ onEnter, onDone, onSkip }: { onEnter: () => void; onDone
           </p>
         </div>
       </div>
-      {/* Visitors who came for the work land on the computer's screen as soon as the room opens; Full screen is one
-          click from there. The click also skips the loader's holds, like any click. */}
-      <SiteLink className="intro-site" style={rise(0.3)} onOpen={onSkip} />
     </div>
   )
 }

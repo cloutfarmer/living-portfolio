@@ -403,7 +403,7 @@ body,
   color: var(--panel-label-ink);
 }
 
-/* Without JavaScript, under the skip link. */
+/* Without JavaScript, under the site link. */
 .intro-contact {
   position: absolute;
   right: 6%;
@@ -1052,7 +1052,7 @@ body,
   gap: 0.6rem;
 }
 
-/* The site link: "Skip to portfolio" on the loader (to the computer view) and "⤢ Full screen" at the computer. */
+/* The site link: "⤢ Full screen" at the computer, the no-JavaScript loader's link and the load-error screen's. */
 .site-link {
   display: inline-block;
 }
@@ -1091,11 +1091,6 @@ body,
   right: 6%;
   bottom: 7%;
   animation: intro-rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.3s both;
-  transition: opacity 0.45s ease;
-}
-
-.intro-leaving .intro-site {
-  opacity: 0;
 }
 
 .leave-button {

@@ -61,8 +61,8 @@ hold 5173. In development, `window.__renderer` and `window.__scene` expose the r
   - Click the pinboard open, click a print (nothing happens), then leave two ways: off the board, and Esc.
   - Esc from Projects to Desk to Room. Clicking the monitor from Room stops at Desk.
   - Sitting at the computer: the head turns to the main monitor and the live page fades in, then takes clicks and the
-    wheel. Leaving partway works, and leaving fades the page before the camera moves. "⤢ Full screen" and "Skip to
-    portfolio →" reach `/projects/index.html?from=room`, and "Back to the room" returns.
+    wheel. Leaving partway works, and leaving fades the page before the camera moves. "⤢ Full screen" reaches
+    `/projects/index.html?from=room`, and "Back to the room" returns.
   - Reverse a move partway, and press Esc during a sit.
   - Tab through the controls, open the pinboard from its button, and open Credits.
   - Turn on reduced motion.

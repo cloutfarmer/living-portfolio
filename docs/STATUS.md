@@ -16,7 +16,7 @@ entries.
   - Seasonal skis or surfboard.
   - Candle and blinds reactions.
   - A window with the real sun and moon and live National Weather Service weather.
-  - Credits, a title-fill loader whose "Skip to portfolio" opens the Computer view, a "⤢ Full screen" pop-out (not on phones, where the site has its own "Back to the room"), and a
+  - Credits, a title-fill loader, a "⤢ Full screen" pop-out (not on phones, where the site has its own "Back to the room"), and a
     museum placard under the view menu with a "See my projects" button and contact links.
   - Until the visitor first reaches the desk, a glowing "Projects" nameplate over the main monitor points at the
     computer.
@@ -42,9 +42,9 @@ stated.
   night, and Credits list each CC-BY author.
 - **Pinboard:** opened prints never overlap, and Esc or a click off the board steps back. 60 fast passes showed 0
   shimmer sweeps. One photo changes every 50–64 s, never while open. The Room view takes 219 draw calls at noon.
-- **Loader and skip link** (production preview): the title is centered within 0.01 px, and the fill never goes
-  backwards. It takes about 2.8 s on a fast connection. With JavaScript off, the name, title and skip link still show
-  and work.
+- **Loader** (production preview): the title is centered within 0.01 px, and the fill never goes
+  backwards. It takes about 2.8 s on a fast connection. The loader has no site link. With JavaScript off, the name, title, a
+  "See my projects →" link to the site and the contact links show.
 - **Weather and sky:** the live call goes to `api.weather.gov` and reaches the scene. With the API blocked, the room
   still loads, and `?weather=rain|snow|storm` forces a sky. `check-sky.mjs` checks sun elevation within 0.5° of stored
   sunrise and sunset, moon phase, and the NWS reply shapes. NJ clock time holds under a London browser time zone.
@@ -59,14 +59,13 @@ stated.
 - **Landing guidance** (dev server, 1440x900, 1024x768 and 390x844): the placard sits under the menu with no overlap
   of the menu, Credits or the monitor nameplate. "See my projects" opens the Computer view with the live site;
   "Leave computer" focuses "Desk", and back in the room the nameplate is gone. Reduced motion stops the nameplate's
-  glow. The loader's "Skip to portfolio" lands on the Computer view with the live site, 0 page errors. At 1024x768
+  glow. At 1024x768
   the placard covers most of the pinboard. On phones the placard is compact, its button and links on one row, and the room drops
   into the spare height below it. Playwright WebKit at 375x548, 390x664 and 430x739 shows the monitor nameplate clear of
   the placard; at 320x568 the placard fits the width.
 - **Accessibility:** one live region announces each view, and leaving the computer or phone returns focus to "Desk".
 - **CSP:** the production build, served with the exact header from `infra/site.yml`, logs 0 page errors, 0 console
-  errors and 0 CSP violations through Room, Desk, Projects, Fitness, Pinboard, "Skip to portfolio" and "Back to the
-  room". An earlier check missed a `WebAssembly.instantiate()` page error on every load, from drei's default meshopt
+  errors and 0 CSP violations through Room, Desk, Projects, Fitness, Pinboard and "Back to the room". An earlier check missed a `WebAssembly.instantiate()` page error on every load, from drei's default meshopt
   decoder; the room now loads with Draco and meshopt off. The live site sends the header.
 - **Builds:** `npm run build`, `npm test` and `check-screen-animation.mjs` pass. CI runs `npm ci`, the build,
   `npm test`, the diff check, the repository scan, the public-safety check and `kit-check`. It doesn't render the scene.
