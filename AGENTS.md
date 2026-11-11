@@ -14,6 +14,9 @@ under `docs/`.
   editing files you didn't write, and report work that isn't yours.
 - Changes go on a `work/<topic>-YYYYMMDD` branch in a separate worktree, then to `main`;
   only a push to `prod` deploys. See `CONTRIBUTING.md`.
+- Before planning, run `git fetch origin` and read code from `origin/main`
+  (`git show origin/main:<path>` or a fresh worktree), not the local checkout.
+  Merge `origin/main` into a work branch before its PR.
 
 ## Start here
 
