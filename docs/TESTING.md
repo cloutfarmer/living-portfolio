@@ -15,10 +15,12 @@ files, and rejects files over 5 MiB. Neither proves behavior or license complian
 For site changes, also run from `web/`:
 
 - `npm run build`: typechecks and builds.
-- `npm test` (`node scripts/check-sky.mjs`): the sun against stored sunrise and sunset times, the moon's phase, the beam, daylight
-  and weather readings.
-- `node scripts/check-screen-animation.mjs`: 20 s of the real animation callback. The right monitor's old bars stay
-  hidden under vim, typing reaches the shared desk state, and the head turns as `desk.focus` changes.
+- `npm test` runs three scripts, and CI runs it too:
+  - `check-sky.mjs`: the sun against stored sunrise and sunset times, the moon's phase, the beam, daylight and weather
+    readings.
+  - `check-screen-animation.mjs`: 20 s of the real animation callback. The right monitor's old bars stay hidden under
+    vim, typing reaches the shared desk state, and the head turns as `desk.focus` changes.
+  - `check-static-intro.mjs`: the name, title, site link and contact links in `index.html` match the components.
 
 Then check the site in a browser (below).
 

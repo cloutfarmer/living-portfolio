@@ -1,7 +1,7 @@
 import { useFrame, useThree } from '@react-three/fiber'
 import { type RefObject, useEffect, useRef } from 'react'
 import { MathUtils, type PerspectiveCamera, type Sphere, Spherical, Vector3 } from 'three'
-import { REDUCED_MOTION } from './Life'
+import { channel, damp, REDUCED_MOTION } from './motion'
 
 /** Where the camera looks, described so that any two shots can blend. */
 export type Shot = {
@@ -54,21 +54,6 @@ function paceBetween(from: number, to: number) {
   if (to === 2) return from === 1 ? PACE.sit : PACE.flyToSeat
   if (from === 2) return to === 1 ? PACE.stand : PACE.flyFromSeat
   return to > from ? PACE.deeper : PACE.back
-}
-
-export type Channel = { value: number; velocity: number }
-
-export const channel = (value: number): Channel => ({ value, velocity: 0 })
-
-// Critically damped spring. Velocity carries over, so a new goal bends the path instead of restarting it.
-export function damp(state: Channel, goal: number, pace: number, delta: number) {
-  const omega = 2 / pace
-  const x = omega * delta
-  const decay = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x)
-  const change = state.value - goal
-  const carried = (state.velocity + omega * change) * delta
-  state.velocity = (state.velocity - omega * carried) * decay
-  state.value = goal + (change + carried) * decay
 }
 
 // The goal angle's equivalent nearest to the current one, so the camera turns the short way round.

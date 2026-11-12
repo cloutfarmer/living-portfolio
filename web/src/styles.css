@@ -930,96 +930,6 @@ body,
   opacity: 0.7;
 }
 
-/* PARKED with AltTab.tsx for a future easter egg: the window switcher. Sizes are in the screen's own 1440-wide pixels. */
-/* Colours follow the Night shift site it opens: graphite panel, hairline border, amber selection. */
-.alt-tab {
-  position: absolute;
-  inset: 0;
-  color: #e6e3dc;
-  font-family: system-ui, sans-serif;
-}
-
-.alt-tab img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.alt-tab-editor,
-.alt-tab-window {
-  position: absolute;
-  inset: 0;
-}
-
-.alt-tab-panel {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  display: flex;
-  gap: 32px;
-  padding: 28px 28px 72px;
-  border: 1px solid #343a45;
-  border-radius: 22px;
-  background: #0b0d10eb;
-  box-shadow: 0 24px 70px #000c, 0 0 0 1px #0b0d10;
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.94);
-  transition: opacity 0.1s ease, transform 0.16s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.alt-tab-panel .alt-tab-tile {
-  flex: none;
-  width: 288px;
-  height: 177px;
-  overflow: hidden;
-  border-radius: 10px;
-  outline: 4px solid transparent;
-  outline-offset: 5px;
-  transition: outline-color 0.1s ease, box-shadow 0.1s ease;
-}
-
-.alt-tab-panel .alt-tab-tile-on {
-  outline-color: #f2b53a;
-  box-shadow: 0 0 28px #f2b53a59;
-}
-
-.alt-tab-label {
-  position: absolute;
-  right: 0;
-  bottom: 22px;
-  left: 0;
-  font-size: 24px;
-  letter-spacing: 0.01em;
-  text-align: center;
-}
-
-.alt-tab-step-panel .alt-tab-panel,
-.alt-tab-step-selected .alt-tab-panel {
-  opacity: 1;
-  transform: translate(-50%, -50%);
-}
-
-/* Starts exactly over the Projects tile: half a tile and half a gap right, and up by half the label's space. */
-.alt-tab-window {
-  opacity: 0;
-  transform: translate(160px, -22px) scale(0.2);
-}
-
-.alt-tab-step-opening .alt-tab-window,
-.alt-tab-step-revealing .alt-tab-window {
-  opacity: 1;
-  transform: none;
-  transition: transform 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-/* The window and editor fade together, uncovering the live page beneath. */
-.alt-tab-step-revealing .alt-tab-window,
-.alt-tab-step-revealing .alt-tab-editor {
-  opacity: 0;
-  transition: opacity 0.14s ease;
-}
-
 /* The live page fades in over the monitor's picture of it once loaded, and back out on leaving. */
 .screen-live {
   position: relative;
@@ -1099,7 +1009,15 @@ body,
   font-size: 1rem;
 }
 /* Narrow windows have no room beside the view buttons. */
-@media(max-width:767px){.leave-phone{top:auto;right:auto;bottom:20px;left:20px}}
+@media (max-width: 767px) {
+  .leave-phone {
+    top: auto;
+    right: auto;
+    bottom: 20px;
+    left: 20px;
+  }
+}
+
 /* On phones the site already fills the window, so Full screen would do nothing: the site shows its own
    "Back to the room" instead (Monitor's `exit=1`), and Escape still leaves. */
 @media (max-width: 767px) {
@@ -1122,6 +1040,30 @@ body,
   }
 }
 
-@media(max-width:767px){.intro-site{left:6%;right:auto}}
-.sr-only{position:fixed;top:0;left:0;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-@media(max-width:767px){iframe[title="Projects dashboard"]{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important}}
+@media (max-width: 767px) {
+  .intro-site {
+    left: 6%;
+    right: auto;
+  }
+}
+
+.sr-only {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* On phones the live page fills the window. !important, to win over the sizes in the iframe's own style attribute. */
+@media (max-width: 767px) {
+  iframe.screen-live {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+  }
+}

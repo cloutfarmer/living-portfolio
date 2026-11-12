@@ -22,7 +22,7 @@ npx vite               # the room only; serves http://localhost:5173 or the next
 ```
 
 Without the personal site checked out, the room works, but the main monitor and the "⤢ Full screen" link load
-the room itself (Vite's fallback page) instead of the site.
+the room itself (Vite's fallback page) instead of the site. `npm run dev` does the same there, after a warning.
 With `../portfolio-dashboard` present (or `DASHBOARD_DIR` set), use the full commands:
 
 ```sh

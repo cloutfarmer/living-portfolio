@@ -1,5 +1,5 @@
 import { type CSSProperties, Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { REDUCED_MOTION } from '../Life'
+import { REDUCED_MOTION } from '../motion'
 import { hasVisited, LOAD_STEPS, loadState, markVisited, WEATHER_WAIT_MS } from '../loading'
 
 const STALL_MS = 100

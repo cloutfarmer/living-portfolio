@@ -12,7 +12,7 @@ import {
   Vector2,
   Vector3,
 } from 'three'
-import { REDUCED_MOTION } from './Life'
+import { REDUCED_MOTION } from './motion'
 import { loadState } from './loading'
 import { daylight, directSun, moonPhase, moonPosition, roomDirection, sunPosition, type Vector } from './sun'
 import { CLEAR, PRESETS, skyTime, watchWeather, type Weather } from './weather'

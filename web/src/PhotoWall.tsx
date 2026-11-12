@@ -13,8 +13,7 @@ import {
   type Texture,
   Vector3,
 } from 'three'
-import { channel, damp } from './CameraRig'
-import { REDUCED_MOTION, TAP_SLOP } from './Life'
+import { channel, damp, REDUCED_MOTION, TAP_SLOP } from './motion'
 import { loadState } from './loading'
 
 // Every image in ./pinboard appears on the wall, in name order (photo-2 before photo-10). Fill it with
@@ -205,6 +204,7 @@ function Print({
   textures,
   wall,
   shadow,
+  sweep,
   open,
   interactive,
   onActivate,
@@ -214,6 +214,8 @@ function Print({
   textures: Texture[]
   wall: React.RefObject<Wall>
   shadow: Texture
+  /** One band for every print: only one sweeps at a time, so they can share its offset. */
+  sweep: Texture
   open: boolean
   /** Only the closed pile takes the pointer: a click opens the board. */
   interactive: boolean
@@ -229,7 +231,6 @@ function Print({
   const shadowMesh = useRef<Mesh>(null)
   const shadowMaterial = useRef<MeshBasicMaterial>(null)
   const sweepMesh = useRef<Mesh>(null)
-  const sweep = useMemo(paintSweep, [])
   const under = useRef<MeshBasicMaterial>(null)
   const over = useRef<MeshBasicMaterial>(null)
   const overMesh = useRef<Mesh>(null)
@@ -246,7 +247,6 @@ function Print({
   const [firstShown] = useState(() => wall.current.showing[index])
 
   useEffect(() => () => crops.forEach((crop) => crop.dispose()), [crops])
-  useEffect(() => () => sweep.dispose(), [sweep])
 
   const leave = useCallback(() => {
     visit.current.inside = false
@@ -439,8 +439,10 @@ export function PhotoWall({
   })
   const cork = useMemo(paintCork, [])
   const shadow = useMemo(paintShadow, [])
+  const sweep = useMemo(paintSweep, [])
   useEffect(() => () => cork.dispose(), [cork])
   useEffect(() => () => shadow.dispose(), [shadow])
+  useEffect(() => () => sweep.dispose(), [sweep])
   useEffect(() => {
     loadState.photos = true
   }, [])
@@ -527,6 +529,7 @@ export function PhotoWall({
           textures={textures}
           wall={wall}
           shadow={shadow}
+          sweep={sweep}
           open={open}
           interactive={clickable}
           onActivate={onOpen}

@@ -3,11 +3,8 @@ import { useMemo, useRef } from 'react'
 import { type Group, MathUtils, type Mesh, MeshStandardMaterial, type Object3D, Vector3 } from 'three'
 import { VimScreen } from './components/VimScreen'
 import { desk } from './desk'
+import { REDUCED_MOTION } from './motion'
 import { skyTime } from './weather'
-
-export const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-// How far a press may move, in pixels, and still count as a click rather than a drag to look around. Fingers wobble.
-export const TAP_SLOP = window.matchMedia('(pointer: coarse)').matches ? 10 : 4
 
 // On the back wall above the open space, clear of the shelf and the window.
 const CLOCK_POSITION: [number, number, number] = [-0.35, 2.3, -1.59]
@@ -111,6 +108,8 @@ export function Life({ scene, glance }: { scene: Object3D; glance: number }) {
     if (phone && !phone.userData.ownMaterial) {
       // Cloned so that the notification lights only the phone.
       phone.material = (phone.material as MeshStandardMaterial).clone()
+      // The colour of its notification glow, which the frame loop below only brightens and dims.
+      if (!REDUCED_MOTION) (phone.material as MeshStandardMaterial).emissive.set('#bcd8ff')
       phone.userData.ownMaterial = true
     }
     let pcGlow: MeshStandardMaterial | undefined
@@ -197,7 +196,6 @@ export function Life({ scene, glance }: { scene: Object3D; glance: number }) {
     if (parts.phone) {
       const sinceStart = t % PHONE_PING_EVERY_SECONDS
       const glow = sinceStart < 3 ? Math.sin((sinceStart / 3) * Math.PI) : 0
-      parts.phone.emissive.set('#bcd8ff')
       parts.phone.emissiveIntensity = glow * 1.1
     }
   })
