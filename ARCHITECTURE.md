@@ -35,8 +35,8 @@ Drei. There is no backend; local content files suffice until evidence justifies 
 | `docs/` | Spec, decisions, setup, tests, and validation evidence |
 
 In `web/src/`: `Life.tsx` motion and the clock, `PhotoWall.tsx` the pinboard, `Outdoors.tsx` the window and sun,
-`Reactions.tsx` the candle and blinds, `components/` the panels, monitors and phone, and `sun.ts`/`weather.ts` the sky
-and live weather. The site ships optimized exports, not source assets. Blender collections are `Room`, `Furniture`,
+`Reactions.tsx` the candle and blinds, `components/` the panels, monitors and phone, `motion.ts` the shared
+reduced-motion flag, tap slop and spring, and `sun.ts`/`weather.ts` the sky and live weather. The site ships optimized exports, not source assets. Blender collections are `Room`, `Furniture`,
 `Clutter`, `Lighting` and `Character`, with named objects and shared materials. The clock and pinboard are built in the
 browser: scene checks can't see them, and their world coordinates don't follow `layout.py`.
 
@@ -62,7 +62,8 @@ The production site is static: `web/dist`, with the personal site copied in at `
 private S3 bucket through CloudFront at `alexsigua.com`, defined in `infra/site.yml` (CloudFormation, us-east-1)
 and uploaded by `web/scripts/deploy.mjs`. There's no server, and the personal site's routes are `#/` hashes, so no
 fallback routing is needed; a CloudFront Function only maps folder paths to `index.html` and `www` to the apex.
-Hashed assets are immutable, HTML always revalidates, the room's GLB goes up Brotli-encoded
+Hashed assets are immutable, HTML always revalidates, the room's GLB keeps its name but is requested with a hash of
+its contents (`vite.config.ts`), and it goes up Brotli-encoded
 ([decisions](docs/DECISIONS.md)), and a deploy refuses uncommitted changes. A push to `prod` in either repository
 deploys through GitHub Actions (OIDC, no stored keys), while `infra/site.yml` stays a manual step. Procedure,
 costs, and rollback are in [deploy](docs/DEPLOY.md).
@@ -71,16 +72,16 @@ costs, and rollback are in [deploy](docs/DEPLOY.md).
 
 The independent sibling `portfolio-dashboard` (a separate, private repository) owns project content. The room serves
 a copied build of it at `/projects/index.html` in development and production, so no dashboard server runs.
-`npm run dev` (`predev`) runs `web/scripts/prepare-dashboard.mjs`, which builds the sibling checkout as it stands
+`npm run dev` (`predev`) runs `web/scripts/prepare-dashboard.mjs --optional`, which builds the sibling checkout as it stands
 (pull its `main` first; `DASHBOARD_DIR` picks another) into ignored `assets/processed/projects/`, clearing the old
-copy first. Vite copies it to `web/dist/projects/`. `assemble-dashboard.mjs` builds both apps; `dashboard-build.json` records the source revision
+copy first; without a checkout, `--optional` warns and goes on, while a deploy stops. Vite copies it to `web/dist/projects/`. `assemble-dashboard.mjs` builds both apps; `dashboard-build.json` records the source revision
 and output hash for local checks only.
 
 `COMPUTER` mode opens the lens to 38° as the camera closes in, then mounts an interactive iframe on `Main_Display`.
 Until then the monitor shows `dashboard-preview.jpg`, and the iframe fades in over it, so nothing jumps. Escape inside
 the site posts a versioned `portfolio:exit` message, checked against the same origin and iframe source. Phones get a
 full-window surface. Leaving fades the iframe out while the camera holds (DOM draws over the scene), then the camera
-reverses. The window switcher (`AltTab.tsx`) is parked, unmounted, for a future easter egg.
+reverses. The window switcher (`AltTab.tsx`, with its own `AltTab.css`) is parked, unmounted, for a future easter egg.
 
 `components/SiteLink.tsx` pops out to `/projects/index.html?from=room` in the same tab, from the computer and the
 load-error screen. `web/index.html` holds the loader's name and unlit title in plain HTML, so they show at first paint,

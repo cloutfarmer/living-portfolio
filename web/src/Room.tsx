@@ -1,5 +1,5 @@
-import { Html, useAnimations, useCursor, useGLTF } from '@react-three/drei'
-import { useFrame, useThree } from '@react-three/fiber'
+import { Html, useAnimations, useCursor } from '@react-three/drei'
+import { useFrame, useLoader, useThree } from '@react-three/fiber'
 import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
   Box3,
@@ -16,8 +16,10 @@ import {
   Spherical,
   Vector3,
 } from 'three'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { CameraRig, DIORAMA_FOV, SEATED_FOV, type Shot } from './CameraRig'
-import { Life, REDUCED_MOTION, TAP_SLOP } from './Life'
+import { Life } from './Life'
+import { REDUCED_MOTION, TAP_SLOP } from './motion'
 import { LoadBoundary } from './components/LoadBoundary'
 import { Nameplate, NAMEPLATES, PROJECTS } from './components/Nameplate'
 import { REACTIVE, Reactions } from './Reactions'
@@ -30,7 +32,9 @@ import { CANDLE_IN_SUN, Outdoors, useSky } from './Outdoors'
 
 export type View = 'ROOM' | 'DESK' | 'COMPUTER' | 'PHONE'
 
-const MODEL_URL = '/corner-desk.glb'
+const MODEL_URL = __ROOM_URL__
+// Narrower windows are phones: the website fills the window instead of the monitor. styles.css's 767px queries match.
+export const PHONE_WIDTH = 768
 // Fill the window's width. Wide windows may crop empty floor and wall height, down to this
 // share of the room's height; shiftUp moves that crop toward the floor, which is mostly empty.
 // Tall windows have height to spare: the room drops by this share of it, clearing the placard under the menu.
@@ -117,20 +121,9 @@ function PhotosSkipped() {
   return null
 }
 
-// useGLTF has no progress option. The loader is shared, so this only reports on the room's own file.
-// It measures against the decoded size, because the file arrives Brotli-encoded and event.total is the encoded size.
-const reportRoomBytes: NonNullable<Parameters<typeof useGLTF>[3]> = (loader) => {
-  const load = loader.load.bind(loader)
-  loader.load = (url, onLoad, onProgress, onError) =>
-    load(
-      url,
-      onLoad,
-      (event) => {
-        if (url === MODEL_URL) loadState.roomBytes = Math.min(event.loaded / __ROOM_BYTES__, 1)
-        onProgress?.(event)
-      },
-      onError,
-    )
+// Measured against the decoded size, because the file arrives Brotli-encoded and event.total is the encoded size.
+const reportRoomBytes = (event: ProgressEvent) => {
+  loadState.roomBytes = Math.min(event.loaded / __ROOM_BYTES__, 1)
 }
 
 function shotFrom({ position, target, zoom }: Pose, viewHeight: number): Shot {
@@ -198,8 +191,9 @@ export function Room({
   onSelectComputer: () => void
   onSelectPhone: () => void
 }) {
-  // No Draco or meshopt: the room is plain glTF, and meshopt's WASM decoder would break the CSP's script-src 'self'.
-  const { scene, animations } = useGLTF(MODEL_URL, false, false, reportRoomBytes)
+  // three's own loader, not drei's useGLTF, which bundles Draco and meshopt decoders even when they're off. The room
+  // is plain glTF, and meshopt's WASM decoder would break the CSP's script-src 'self'.
+  const { scene, animations } = useLoader(GLTFLoader, MODEL_URL, undefined, reportRoomBytes)
   const { actions } = useAnimations(animations, scene)
   const size = useThree((state) => state.size)
   const gl = useThree((state) => state.gl)
@@ -228,21 +222,29 @@ export function Room({
   useCursor(lean !== null || photoHovered || (reacting && reactionHovered))
 
   const lights = useMemo(() => {
-    const found: { light: Light; base: number }[] = []
+    // Sorted by name once here, so the frame loop doesn't match names again.
+    const found: { light: Light; base: number; candle: boolean; daylight: number; blinds: boolean }[] = []
     scene.traverse((object) => {
       const light = object as Light
       if (!light.isLight) return
       // Remember the exported value, because flicker overwrites intensity every frame.
       light.userData.exported ??= light.intensity
       const level = LIGHT_LEVELS.find(([name]) => name.test(light.name))?.[1] ?? 1
-      found.push({ light, base: light.userData.exported * level })
+      found.push({
+        light,
+        base: light.userData.exported * level,
+        candle: /^Candle/.test(light.name),
+        // How bright it is in full daylight, relative to night.
+        daylight: light.name === 'Soft_window' ? DAY_WINDOW : light.name === 'Warm_fill' ? DAY_WARM_FILL : 1,
+        blinds: /^(Soft_window|Window_soft_light)$/.test(light.name),
+      })
     })
     return found
   }, [scene])
-  const candles = useMemo(() => lights.filter(({ light }) => /^Candle/.test(light.name)), [lights])
+  const candles = useMemo(() => lights.filter(({ candle }) => candle), [lights])
   const sky = useSky()
   const windowLight = useMemo(() => {
-    const light = lights.find(({ light }) => /^Soft_window$/.test(light.name))?.light
+    const light = lights.find(({ light }) => light.name === 'Soft_window')?.light
     return light && { light, night: light.color.clone() }
   }, [lights])
   const candleGlow = useMemo(() => {
@@ -289,12 +291,11 @@ export function Room({
   )
   const monitorTop = useMemo(() => topOf('Main_Display'), [topOf])
 
-  const shots = useMemo(() => {
-    const fit = (scale: number) => Math.min(size.width, size.height) / scale
+  // What the ROOM camera actually sees, measured in its own view space. The scene holds still, so this is measured
+  // once; only the framing below follows the window's size.
+  const authoredView = useMemo(() => {
     const authored = scene.getObjectByName('ROOM') as OrthographicCamera | undefined
     if (!authored?.isCamera) return null
-
-    // Frame what the ROOM camera actually sees, measured in its own view space.
     scene.updateMatrixWorld(true)
     const toView = authored.matrixWorld.clone().invert()
     const seen = new Box3()
@@ -304,6 +305,13 @@ export function Room({
       geometry.computeBoundingBox()
       seen.union(geometry.boundingBox!.clone().applyMatrix4(toView.clone().multiply(matrixWorld)))
     })
+    return { authored, seen }
+  }, [scene])
+
+  const shots = useMemo(() => {
+    if (!authoredView) return null
+    const { authored, seen } = authoredView
+    const fit = (scale: number) => Math.min(size.width, size.height) / scale
     const middle = seen.getCenter(new Vector3())
     const extent = seen.getSize(new Vector3())
     const zoom = Math.min(
@@ -359,10 +367,10 @@ export function Room({
       ROOM: shotFrom(room, size.height),
       DESK: deskShot,
       // On phones the dashboard fills the window, so the camera stays at the desk behind it.
-      COMPUTER: size.width < 768 ? deskShot : seated,
+      COMPUTER: size.width < PHONE_WIDTH ? deskShot : seated,
       PHONE: phone,
     }
-  }, [scene, desk, size])
+  }, [scene, authoredView, desk, size])
 
   const keepOut = useMemo(() => {
     const box = new Box3()
@@ -412,14 +420,14 @@ export function Room({
         }
       }
     })
-    lights.forEach(({ light: exported, base }) => {
+    lights.forEach(({ light: exported, base, candle }) => {
       const light = exported as PointLight
       light.intensity = base
       // A light switched off still costs every lit pixel, so leave it out of the shaders.
       light.visible = base > 0
       // Blender's soft lights become hard lights here, and overlapping shadows look chaotic,
       // so only the candle casts them.
-      if (/^Candle/.test(light.name)) {
+      if (candle) {
         light.userData.restY ??= light.position.y
         light.position.y = light.userData.restY + CANDLE_LIGHT_LIFT
         light.castShadow = true
@@ -488,11 +496,10 @@ export function Room({
       ambient.current.intensity = (MathUtils.lerp(AMBIENT, DAY_AMBIENT, day) + sky.flash * LIGHTNING_AMBIENT) * roomLight.current
       ambient.current.color.copy(NIGHT_AMBIENT_COLOR).lerp(DAY_AMBIENT_COLOR, day)
     }
-    lights.forEach(({ light: item, base }) => {
-      if (/^Candle/.test(item.name)) return
-      const level = /^Soft_window$/.test(item.name) ? MathUtils.lerp(1, DAY_WINDOW, day) : /^Warm_fill$/.test(item.name) ? MathUtils.lerp(1, DAY_WARM_FILL, day) : 1
-      const blinds = /^(Soft_window|Window_soft_light)$/.test(item.name) ? MathUtils.lerp(1, BLINDS_LIGHT, blindsShut.current) : 1
-      item.intensity = base * level * blinds * roomLight.current
+    lights.forEach(({ light: item, base, candle, daylight, blinds }) => {
+      if (candle) return
+      const shade = blinds ? MathUtils.lerp(1, BLINDS_LIGHT, blindsShut.current) : 1
+      item.intensity = base * MathUtils.lerp(1, daylight, day) * shade * roomLight.current
     })
     if (windowLight) windowLight.light.color.copy(windowLight.night).lerp(DAY_WINDOW_COLOR, day)
     const glow = MathUtils.lerp(GLOW_IN_SUN, 1, (sky.candle - CANDLE_IN_SUN) / (1 - CANDLE_IN_SUN)) * candleLife.current
@@ -536,6 +543,7 @@ export function Room({
       <Monitor
         scene={scene}
         active={view === 'COMPUTER'}
+        mobile={size.width < PHONE_WIDTH}
         seated={screenOpen}
         closing={closing}
         onClosed={handleScreenClosed}

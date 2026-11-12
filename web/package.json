@@ -9,9 +9,9 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test": "node scripts/check-sky.mjs",
+    "test": "node scripts/check-sky.mjs && node scripts/check-screen-animation.mjs && node scripts/check-static-intro.mjs",
     "export-scene": "node scripts/export-scene.mjs",
-    "predev": "node scripts/prepare-dashboard.mjs",
+    "predev": "node scripts/prepare-dashboard.mjs --optional",
     "prepare-dashboard": "node scripts/prepare-dashboard.mjs",
     "prepare-photos": "node scripts/prepare-photos.mjs"
   },

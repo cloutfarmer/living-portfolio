@@ -2,7 +2,7 @@ import { Html } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Box3, type Group, MathUtils, type Mesh, type Object3D, type PerspectiveCamera, Quaternion, Vector3 } from 'three'
-import { REDUCED_MOTION, TAP_SLOP } from '../Life'
+import { REDUCED_MOTION, TAP_SLOP } from '../motion'
 import { skyTime } from '../weather'
 
 type Notice = { account: string; url: string; name: string; about: string; action: string }
@@ -51,7 +51,12 @@ function nextNotice(account: string) {
   const state = decks.get(account) ?? { deck: [] }
   decks.set(account, state)
   if (!state.deck.length) {
-    state.deck = NOTICES.filter((notice) => notice.account === account).sort(() => Math.random() - 0.5)
+    state.deck = NOTICES.filter((notice) => notice.account === account)
+    // Fisher–Yates: every order is equally likely.
+    for (let i = state.deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[state.deck[i], state.deck[j]] = [state.deck[j], state.deck[i]]
+    }
     if (state.deck[0] === state.last && state.deck.length > 1) state.deck.push(state.deck.shift()!)
   }
   state.last = state.deck.shift()!

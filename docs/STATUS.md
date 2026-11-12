@@ -6,7 +6,8 @@ entries.
 ## Current state
 
 - **Environment:** local development, with hosting at `alexsigua.com` defined in `infra/site.yml` ([deploy](DEPLOY.md)).
-  `npm run dev` in `web/` serves the room and builds the separate personal site into `/projects/`.
+  `npm run dev` in `web/` serves the room and builds the separate personal site into `/projects/`, or warns and
+  serves the room alone when that site isn't checked out.
 - **Scene:** `blender/scenes/corner-desk-v038.blend`, exported to `assets/processed/corner-desk.glb`.
 - **In the browser:**
   - Room, Desk and Computer views.
@@ -63,12 +64,19 @@ stated.
   the placard covers most of the pinboard. On phones the placard is compact, its button and links on one row, and the room drops
   into the spare height below it. Playwright WebKit at 375x548, 390x664 and 430x739 shows the monitor nameplate clear of
   the placard; at 320x568 the placard fits the width.
-- **Accessibility:** one live region announces each view, and leaving the computer or phone returns focus to "Desk".
+- **Accessibility:** one live region announces each view, and leaving the computer or phone, by its button or by
+  Escape, returns focus to "Desk".
 - **CSP:** the production build, served with the exact header from `infra/site.yml`, logs 0 page errors, 0 console
   errors and 0 CSP violations through Room, Desk, Projects, Fitness, Pinboard and "Back to the room". An earlier check missed a `WebAssembly.instantiate()` page error on every load, from drei's default meshopt
-  decoder; the room now loads with Draco and meshopt off. The live site sends the header.
-- **Builds:** `npm run build`, `npm test` and `check-screen-animation.mjs` pass. CI runs `npm ci`, the build,
-  `npm test`, the diff check, the repository scan, the public-safety check and `kit-check`. It doesn't render the scene.
+  decoder; the room now loads with three's own loader, so neither decoder is in the bundle. Checked at 1440x900 and at
+  390x844 with touch. The live site sends the header.
+- **Builds:** `npm run build` and `npm test` (sky, screen animation and the static intro) pass. CI runs `npm ci`, the
+  build, `npm test`, the diff check, the repository scan, the public-safety check and `kit-check`. It doesn't render
+  the scene.
+- **Caching:** the page preloads and the loader fetches the room at one address, `corner-desk.glb?v=<hash of the file>`,
+  so there is one request and a changed room is never read from a day-old browser cache. The libraries build to their
+  own file, whose name didn't change across two builds with different app code. Not yet checked through live
+  CloudFront.
 
 ## Could not verify
 

@@ -17,7 +17,8 @@ and are unvalidated until a first run passes.
   checkout and the room from this one, uploads `web/dist`, deletes what the build no longer has, and
   invalidates the HTML and the other fixed-name files. `.github/workflows/deploy.yml` runs it.
 - **Caching:** files under `assets/` are hashed by Vite, so they're cached for a year. HTML is revalidated
-  on every visit. Fixed names (the scene GLB, `og.jpg`) get a day, and every deploy invalidates them.
+  on every visit. Fixed names (the scene GLB, `og.jpg`) get a day, and every deploy invalidates them. The page asks for the GLB with
+  a hash of its contents in the query, so a new build never reads an older room from a browser's cache.
   The scene GLB goes up already Brotli-encoded (`Content-Encoding: br`), because CloudFront doesn't compress
   `model/gltf-binary`; `--dry-run` prints both sizes.
 - `dashboard-build.json`, dotfiles and source maps are never uploaded.

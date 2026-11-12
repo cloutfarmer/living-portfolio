@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
-import { REDUCED_MOTION } from '../Life'
+import { REDUCED_MOTION } from '../motion'
 import previewUrl from '../assets/dashboard-preview.jpg'
+import './AltTab.css'
 
 // PARKED: the switcher isn't mounted. The main monitor now shows the website itself, and the
 // live page fades straight in (see Monitor.tsx). Kept, with the painted editor it opens from,
 // for a future easter egg. To bring it back, render <AltTab editorUrl={paintEditor().toDataURL()} …>
-// over the live screen in Monitor.tsx; its styles are the parked .alt-tab rules in styles.css.
+// over the live screen in Monitor.tsx. Its styles are in AltTab.css, which ships only once this file is imported.
 
 // What the person is working in, until the visitor switches to Projects. Each line is [text, colour] runs.
 const INK = { plain: '#d8d4c8', word: '#c79be0', name: '#8fc7e8', text: '#a9cf8e', note: '#6f7a78', tag: '#e7a977' }

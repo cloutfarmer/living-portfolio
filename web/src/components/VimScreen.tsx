@@ -2,7 +2,7 @@ import { useFrame } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
 import { CanvasTexture, SRGBColorSpace, type Mesh, type Object3D } from 'three'
 import { desk } from '../desk'
-import { REDUCED_MOTION } from '../Life'
+import { REDUCED_MOTION } from '../motion'
 import { surface } from './Monitor'
 
 // The right monitor: vim, typing a small file in a loop. Characters only go in while the

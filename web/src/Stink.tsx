@@ -1,7 +1,7 @@
 import { useFrame } from '@react-three/fiber'
 import { useMemo, useRef } from 'react'
 import { Box3, CatmullRomCurve3, type Mesh, MeshBasicMaterial, type Object3D, TubeGeometry, Vector3 } from 'three'
-import { REDUCED_MOTION } from './Life'
+import { REDUCED_MOTION } from './motion'
 
 // Cartoon stink lines over the open gym bag, for fun: wavy ribbons that rise, sway and fade, one after another.
 const LINES = 3

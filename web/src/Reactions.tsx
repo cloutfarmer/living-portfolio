@@ -1,7 +1,7 @@
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber'
 import { type MutableRefObject, useMemo, useRef } from 'react'
 import { Box3, IcosahedronGeometry, MathUtils, type Mesh, MeshBasicMaterial, type Object3D, Vector3 } from 'three'
-import { REDUCED_MOTION, TAP_SLOP } from './Life'
+import { REDUCED_MOTION, TAP_SLOP } from './motion'
 
 // Small things to do in the room that lead nowhere: blow out the candle, tilt the blinds. They get the pointer cursor but
 // no nameplate: only things that change the view get one.
@@ -99,10 +99,14 @@ export function Reactions({ scene, interactive, candle, shut, onHover }: { scene
     }
   })
 
-  // Room owns the cursor, from onHover.
+  // Room owns the cursor, from onHover. On move as well as over: no new pointer-over fires for a pointer that was
+  // already here when these became live again. The move isn't stopped, so the desk behind still sees it as before.
   const hover = {
     onPointerOver: (event: ThreeEvent<PointerEvent>) => {
       event.stopPropagation()
+      if (interactive) onHover(true)
+    },
+    onPointerMove: () => {
       if (interactive) onHover(true)
     },
     onPointerOut: () => onHover(false),

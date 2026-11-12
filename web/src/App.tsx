@@ -8,13 +8,37 @@ import { LoadBoundary } from './components/LoadBoundary'
 import { PhoneGuide } from './components/PhoneGuide'
 import { SiteLink } from './components/SiteLink'
 import { Placard } from './components/Placard'
-import { Room, type View } from './Room'
+import { PHONE_WIDTH, Room, type View } from './Room'
 
 const VIEWS: { name: View; label: string }[] = [
   { name: 'ROOM', label: 'Room' },
   { name: 'COMPUTER', label: 'Projects' },
   { name: 'DESK', label: 'Desk' },
   { name: 'PHONE', label: 'Fitness' },
+]
+
+// Required by the models' CC-BY licenses. See assets/ASSET_MANIFEST.csv.
+const CREDITS: { href: string; text: string; modified?: boolean }[] = [
+  { href: 'https://www.weather.gov/', text: 'Weather: National Weather Service (NOAA)' },
+  { href: 'https://poly.pizza/m/heqgJSXzOX', text: 'smoothie by rafag2789 [CC-BY] via Poly Pizza', modified: true },
+  { href: 'https://poly.pizza/m/w9sWcWlV9i', text: 'Protein Powder by Zsky [CC-BY] via Poly Pizza', modified: true },
+  { href: 'https://poly.pizza/m/6Xu7mttjodo', text: 'Trophy by Casey Tumbers [CC-BY] via Poly Pizza', modified: true },
+  { href: 'https://poly.pizza/m/bfLOqIV5uP', text: 'Houseplant by Quaternius', modified: true },
+  { href: 'https://poly.pizza/m/Kgt363WkKd', text: 'Flower Pot by Zsky [CC-BY] via Poly Pizza', modified: true },
+  { href: 'https://poly.pizza/m/44XK5UHTd4Q', text: 'Bonsai by Don Carson [CC-BY] via Poly Pizza', modified: true },
+  { href: 'https://poly.pizza/m/cQ3DYD9qBVf', text: 'boooks by Jie gu [CC-BY] via Poly Pizza', modified: true },
+  { href: 'https://poly.pizza/m/aiBozYlPe--', text: 'Small Stack of Paper by Jarlan Perez [CC-BY] via Poly Pizza', modified: true },
+  { href: 'https://poly.pizza/m/1WggoIFq8tx', text: 'Book Stack by Danni Bittman [CC-BY] via Poly Pizza', modified: true },
+  { href: 'https://poly.pizza/m/3oFfQCSsUmQ', text: 'Keyboard by Poly by Google [CC-BY] via Poly Pizza', modified: true },
+  { href: 'https://poly.pizza/m/hW11P9DDXa', text: 'Executive Chair by Zsky [CC-BY] via Poly Pizza', modified: true },
+  { href: 'https://poly.pizza/m/1gB0ED5l7yy', text: 'Scented candle by Poly by Google [CC-BY] via Poly Pizza', modified: true },
+  { href: 'https://poly.pizza/m/cs7k_ENAZjQ', text: 'Trainer by jeremy [CC-BY] via Poly Pizza', modified: true },
+  { href: 'https://poly.pizza/m/PW9q10xh5g', text: 'Dumbbell by CreativeTrio [public domain] via Poly Pizza', modified: true },
+  { href: 'https://poly.pizza/m/fIuM_PW5prV', text: 'Coffee cup by Poly by Google [CC-BY] via Poly Pizza', modified: true },
+  { href: 'https://poly.pizza/m/95I4gsdmurO', text: 'skis by apelab [CC-BY] via Poly Pizza', modified: true },
+  { href: 'https://poly.pizza/m/V2Ebx3pvo4', text: 'Computer Mouse by CreativeTrio', modified: true },
+  { href: 'https://poly.pizza/m/1A07aI9j2d', text: 'Open Book by Quaternius', modified: true },
+  { href: 'https://poly.pizza/m/gKLBoRsyKe', text: 'Hoodie Character by Quaternius', modified: true },
 ]
 
 // Touch screens are usually phones and tablets: fewer multisampled samples keep the effects pass affordable.
@@ -28,7 +52,7 @@ const ANNOUNCE: Record<View | 'BOARD', string> = {
   PHONE: 'Phone view: two Instagram notifications.',
   BOARD: 'Pinboard view: the photos are spread out.',
 }
-// Phones (Monitor's breakpoint) have no Full screen: the site fills the window and has its own way back.
+// Phones (narrower than PHONE_WIDTH) have no Full screen: the site fills the window and has its own way back.
 const ANNOUNCE_PHONE_COMPUTER = 'The website fills the screen. Choose Back to the room to leave.'
 
 export function App() {
@@ -53,27 +77,32 @@ export function App() {
   const handleProjects = useCallback(() => show('COMPUTER'), [show])
   const handleOpenBoard = useCallback(() => setBoard(true), [])
 
-  // One level back: the board or the desk to the room, the computer or phone to the desk.
-  const stepBack = useCallback(() => {
-    if (board) setBoard(false)
-    else if (view === 'COMPUTER' || view === 'PHONE') show('DESK')
-    else if (view === 'DESK') show('ROOM')
-  }, [board, view, show])
-
   // Leaving unmounts the computer or phone controls as it's pressed, which would drop keyboard focus to the page. Hand it to the Desk button.
   const leave = useCallback(() => {
     show('DESK')
     requestAnimationFrame(() => nav.current?.querySelector<HTMLButtonElement>('[aria-current]')?.focus({ preventScroll: true }))
   }, [show])
 
+  // One level back: the board or the desk to the room, the computer or phone to the desk. Escape leaves the
+  // computer or phone the way their buttons do, so the keyboard's focus goes with it; a click has none to keep.
+  const stepBack = useCallback(
+    (byKeyboard = false) => {
+      if (board) setBoard(false)
+      else if ((view === 'COMPUTER' || view === 'PHONE') && byKeyboard) leave()
+      else if (view === 'COMPUTER' || view === 'PHONE') show('DESK')
+      else if (view === 'DESK') show('ROOM')
+    },
+    [board, view, show, leave],
+  )
+
   useEffect(() => {
     const key = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') stepBack()
+      if (event.key === 'Escape') stepBack(true)
     }
     // The embedded site asks to leave. Only the site this page framed, from this origin, may.
     const message = (event: MessageEvent) => {
       if (event.origin !== location.origin || event.data?.type !== 'portfolio:exit' || event.data?.version !== 1) return
-      const frame = document.querySelector<HTMLIFrameElement>('iframe[title="Projects dashboard"]')
+      const frame = document.querySelector<HTMLIFrameElement>('iframe.screen-live')
       if (event.source === frame?.contentWindow) leave()
     }
     window.addEventListener('keydown', key)
@@ -158,73 +187,18 @@ export function App() {
         </button>
       </nav>
       <p className="sr-only" role="status">
-        {entered ? (view === 'COMPUTER' && !board && window.innerWidth < 768 ? ANNOUNCE_PHONE_COMPUTER : ANNOUNCE[board ? 'BOARD' : view]) : ''}
+        {entered ? (view === 'COMPUTER' && !board && window.innerWidth < PHONE_WIDTH ? ANNOUNCE_PHONE_COMPUTER : ANNOUNCE[board ? 'BOARD' : view]) : ''}
       </p>
-      {/* Required by the models' CC-BY licenses. See assets/ASSET_MANIFEST.csv. */}
       <details className={`credits${entered ? ' controls-in' : ''}`} inert={!entered}>
         <summary>Credits</summary>
         <div className="panel-cast">
           <ul className="panel">
-            <li>
-              <a href="https://www.weather.gov/">Weather: National Weather Service (NOAA)</a>
-            </li>
-            <li>
-              <a href="https://poly.pizza/m/heqgJSXzOX">smoothie by rafag2789 [CC-BY] via Poly Pizza</a>, modified
-            </li>
-            <li>
-              <a href="https://poly.pizza/m/w9sWcWlV9i">Protein Powder by Zsky [CC-BY] via Poly Pizza</a>, modified
-            </li>
-            <li>
-              <a href="https://poly.pizza/m/6Xu7mttjodo">Trophy by Casey Tumbers [CC-BY] via Poly Pizza</a>, modified
-            </li>
-            <li>
-              <a href="https://poly.pizza/m/bfLOqIV5uP">Houseplant by Quaternius</a>, modified
-            </li>
-            <li>
-              <a href="https://poly.pizza/m/Kgt363WkKd">Flower Pot by Zsky [CC-BY] via Poly Pizza</a>, modified
-            </li>
-            <li>
-              <a href="https://poly.pizza/m/44XK5UHTd4Q">Bonsai by Don Carson [CC-BY] via Poly Pizza</a>, modified
-            </li>
-            <li>
-              <a href="https://poly.pizza/m/cQ3DYD9qBVf">boooks by Jie gu [CC-BY] via Poly Pizza</a>, modified
-            </li>
-            <li>
-              <a href="https://poly.pizza/m/aiBozYlPe--">Small Stack of Paper by Jarlan Perez [CC-BY] via Poly Pizza</a>, modified
-            </li>
-            <li>
-              <a href="https://poly.pizza/m/1WggoIFq8tx">Book Stack by Danni Bittman [CC-BY] via Poly Pizza</a>, modified
-            </li>
-            <li>
-              <a href="https://poly.pizza/m/3oFfQCSsUmQ">Keyboard by Poly by Google [CC-BY] via Poly Pizza</a>, modified
-            </li>
-            <li>
-              <a href="https://poly.pizza/m/hW11P9DDXa">Executive Chair by Zsky [CC-BY] via Poly Pizza</a>, modified
-            </li>
-            <li>
-              <a href="https://poly.pizza/m/1gB0ED5l7yy">Scented candle by Poly by Google [CC-BY] via Poly Pizza</a>, modified
-            </li>
-            <li>
-              <a href="https://poly.pizza/m/cs7k_ENAZjQ">Trainer by jeremy [CC-BY] via Poly Pizza</a>, modified
-            </li>
-            <li>
-              <a href="https://poly.pizza/m/PW9q10xh5g">Dumbbell by CreativeTrio [public domain] via Poly Pizza</a>, modified
-            </li>
-            <li>
-              <a href="https://poly.pizza/m/fIuM_PW5prV">Coffee cup by Poly by Google [CC-BY] via Poly Pizza</a>, modified
-            </li>
-            <li>
-              <a href="https://poly.pizza/m/95I4gsdmurO">skis by apelab [CC-BY] via Poly Pizza</a>, modified
-            </li>
-            <li>
-              <a href="https://poly.pizza/m/V2Ebx3pvo4">Computer Mouse by CreativeTrio</a>, modified
-            </li>
-            <li>
-              <a href="https://poly.pizza/m/1A07aI9j2d">Open Book by Quaternius</a>, modified
-            </li>
-            <li>
-              <a href="https://poly.pizza/m/gKLBoRsyKe">Hoodie Character by Quaternius</a>, modified
-            </li>
+            {CREDITS.map(({ href, text, modified }) => (
+              <li key={href}>
+                <a href={href}>{text}</a>
+                {modified && ', modified'}
+              </li>
+            ))}
           </ul>
         </div>
       </details>
