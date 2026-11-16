@@ -12,8 +12,8 @@ import { PHONE_WIDTH, Room, type View } from './Room'
 
 const VIEWS: { name: View; label: string }[] = [
   { name: 'ROOM', label: 'Room' },
-  { name: 'COMPUTER', label: 'Projects' },
   { name: 'DESK', label: 'Desk' },
+  { name: 'COMPUTER', label: 'Projects' },
   { name: 'PHONE', label: 'Fitness' },
 ]
 

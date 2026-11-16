@@ -154,7 +154,7 @@ body,
   cursor: pointer;
 }
 
-/* The current view is marked with the leaders' diamond, centred under its word. */
+/* The current view is marked with the leaders' diamond, centred above its word. */
 .views button[aria-current] {
   font-style: italic;
 }
@@ -162,7 +162,7 @@ body,
 .views button[aria-current]::after {
   content: '';
   position: absolute;
-  bottom: -0.05rem;
+  top: -0.05rem;
   left: calc(50% - 0.18rem);
 }
 
