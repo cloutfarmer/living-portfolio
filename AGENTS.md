@@ -64,7 +64,6 @@ messages, PR text or branch names:
 
 ## Engineering invariants
 
-- Prove the single-cube connection and reload before room modeling.
 - Prove the complete room → desk → content → back loop before expanding scope. The primary monitor dashboard is
   approved; other content interactions remain deferred. Reactions that stay in the room are fine.
 - Provide keyboard-accessible navigation to the same content as 3D interaction.
